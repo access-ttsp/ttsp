@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+In planning mode, **always** show which tools you will use (MCP servers, web_search, etc.).
+When reporting, **always** include the tools you actually used, and if you are unable to use some tools, list them with reasons.

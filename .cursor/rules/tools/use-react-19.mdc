@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+---
+Remember that you are using React 19. And it slightly different from earlier versions. Keep this in mind when you are writing code.

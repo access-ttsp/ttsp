@@ -1,3 +1,14 @@
 ---
 alwaysApply: true
 ---
+In Ask mode and Plan mode, use the following process:
+
+- Use web search to find information for things you analyze. Your pretrained data is outdated. **Always** refresh your knowledge before you start.
+- When planning, **always** add to the plan that Agent must pack remote repos using repomix and pack remote. And must grep repomix output for information for every method, function, class, etc. agent is using from these libraries. **Always** add list of remote packages(repos urls) that should be packed.
+- When planning **always** implicitly tell Agent to do exactly and only what is asked in the task.
+- When planning always add test plan:
+  - Run `bun fix` to see ultracite errors.
+  - Run `bun run build` to see if there are any errors.
+  - Check if anything on port 3000 is running. If yes, this means that dev server is running. Uf not run `bun dev` to start it.
+  - Use nextjs-devtools-mcp to check if you can navigate to the page without errors.
+  - If you started dev server by your self - kill it.

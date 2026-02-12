@@ -1,3 +1,5 @@
 ---
 alwaysApply: true
 ---
+
+Always use Next.js Server Actions for data mutations instead of fetch.

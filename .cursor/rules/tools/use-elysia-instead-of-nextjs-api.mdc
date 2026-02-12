@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+All requests to /app/api are handled by Elysia in src/elysia.

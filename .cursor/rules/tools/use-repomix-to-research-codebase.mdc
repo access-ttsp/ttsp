@@ -1,3 +1,6 @@
 ---
 alwaysApply: true
 ---
+Use repomix MCP (report if not found).
+Main repomix output is in `repomix-output.xml` file.
+If repomix MCP tools are unavailable (e.g. Ask/Plan mode), read `repomix-output.xml` directly.
