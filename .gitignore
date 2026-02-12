@@ -2,6 +2,8 @@
 
 # ttsp
 better-auth.db
+app.db
+repomix-output.xml
 
 # dependencies
 /node_modules
