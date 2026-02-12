@@ -4,6 +4,7 @@
 better-auth.db
 app.db
 repomix-output.xml
+tasks
 
 # dependencies
 /node_modules

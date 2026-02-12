@@ -122,8 +122,8 @@ export const VideoPlayerContent = ({
   ...props
 }: VideoPlayerContentProps) => (
   <video
-    suppressHydrationWarning
     className={cn("mt-0 mb-0", className)}
+    suppressHydrationWarning
     {...props}
   />
 );

@@ -12,7 +12,8 @@
     "better-auth:db:migrate": "bunx @better-auth/cli migrate",
     "app:db:generate": "drizzle-kit generate",
     "app:db:migrate": "drizzle-kit migrate",
-    "prepare": "husky"
+    "prepare": "husky",
+    "kill:3000": "kill -9 $(lsof -ti tcp:3000)"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
