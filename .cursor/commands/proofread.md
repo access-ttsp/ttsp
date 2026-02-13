@@ -1,0 +1,1 @@
+Proofread the text for grammar, spelling, punctuation, and clarity. Ensure proper capitalization, consistent style, and correct any typos or awkward phrasing. Maintain the original meaning and tone while improving readability.

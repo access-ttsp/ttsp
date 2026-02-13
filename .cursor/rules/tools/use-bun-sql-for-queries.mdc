@@ -1,0 +1,58 @@
+---
+alwaysApply: true
+---
+
+Use bun.sql`` for sql queries.
+
+**Examples**
+
+```ts
+const users = await sql`
+  SELECT * FROM users
+  WHERE active = ${true}
+  LIMIT ${10}
+`;
+```
+
+```ts
+const userData = {
+  name: "Alice",
+  email: "alice@example.com",
+};
+
+const [newUser] = await sql`
+  INSERT INTO users ${sql(userData)}
+  RETURNING *
+`;
+```
+
+```ts
+const users = [
+  { name: "Alice", email: "alice@example.com" },
+  { name: "Bob", email: "bob@example.com" },
+  { name: "Charlie", email: "charlie@example.com" },
+];
+
+await sql`INSERT INTO users ${sql(users)}`;
+```
+
+```ts
+// Optional WHERE clauses
+const filterAge = true;
+const minAge = 21;
+const ageFilter = sql`AND age > ${minAge}`;
+await sql`
+  SELECT * FROM users
+  WHERE active = ${true}
+  ${filterAge ? ageFilter : sql``}
+`; 
+```
+
+```ts
+await sql.begin(async tx => {
+  return [
+    tx`INSERT INTO users (name) VALUES (${"Alice"})`,
+    tx`UPDATE accounts SET balance = balance - 100 WHERE user_id = 1`,
+  ];
+});
+```

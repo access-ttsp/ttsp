@@ -1,3 +1,64 @@
 ---
 alwaysApply: true
 ---
+
+# Use `next/image` instead of `<img>`
+
+Always use the `next/image` component for displaying images in Next.js applications. This ensures optimal performance, automatic image optimization, and better user experience.
+
+## Bad Examples ❌
+
+- Using a standard `<img>` tag:
+
+```tsx
+<img src="/images/hero.jpg" alt="Hero Image" className="w-full" />
+```
+
+- Using a standard `<img>` tag with inline styles:
+
+```tsx
+<img src="/images/avatar.png" alt="User Avatar" style={{ width: 48, height: 48 }} />
+```
+
+## Good Examples ✅
+
+- Using `next/image` with required `width`, `height`, and `alt` props:
+
+```tsx
+import Image from 'next/image';
+
+<Image src="/images/hero.jpg" alt="Hero Image" width={1920} height={1080} className="w-full" />
+```
+
+- Using `next/image` with `fill` prop for responsive images:
+
+```tsx
+import Image from 'next/image';
+
+<div className="relative w-full h-64">
+ <Image src="/images/background.png" alt="Background" fill style={{ objectFit: 'cover' }} />
+</div>
+```
+
+- Using `next/image` with `sizes` and `quality` for advanced optimization:
+
+```tsx
+import Image from 'next/image';
+
+<Image
+ src="/images/product.jpg"
+ alt="Product"
+ width={500}
+ height={500}
+ sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+ quality={80}
+/>
+```
+
+## Why?
+
+- **Performance**: `next/image` automatically optimizes images (resizing, lazy loading, WebP conversion) to reduce page load times.
+- **Improved CLS**: Prevents layout shifts by reserving space for images before they load.
+- **Responsiveness**: Easily create responsive images that adapt to different screen sizes and resolutions.
+- **Accessibility**: Enforces `alt` attribute for better accessibility.
+- **Future-Proofing**: Integrates seamlessly with Next.js features and future optimizations.

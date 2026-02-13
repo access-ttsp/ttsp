@@ -2,34 +2,27 @@
 alwaysApply: true
 ---
 
-In Ask mode and Plan mode, use the following process:
+In Plan mode, use the following process:
 
-- You **must** use web search to update information about tools you will include in plan. Your pre-trained data is outdated — **always** refresh your knowledge before you start. List all tools you planninig to use one by one and conferm you updated info.
-- When planning, **always** add to the plan:
-  - The agent must pack remote repositories using repomix and the `pack remote` command.
-  - The agent must use grep on the repomix output to get information for every method, function, class, etc. used from those libraries.
-  - **Always** include a list of remote packages (repository URLs) that need to be packed.
-- When planning, **always** explicitly instruct the agent to do exactly and only what is required for the task.
-- When planning, **always** add a test plan:
-  - Run `bun fix` to check for ultracite errors.
-  - Run `bun run build` to make sure there are no build errors.
-  - Check if anything is already running on port 3000. If yes, that means the dev server is already running; if not, start it with `bun dev`.
-  - Use nextjs-devtools-mcp to check if you can navigate to the page without errors.
-  - If you started the dev server yourself, stop it after testing.
+## General
+This plan will be implemented by Sonnet 4.5—a/Haiku 4.5 thinking model less smart than you. So be very specific and detailed. 
+This should be a literal step-by-step and detailed plan.
 
-## Example of a good plan structure
+## Process
+- You **must** use web search to update information about tools you will include in the plan. Your pre-trained data is outdated—**always** refresh your knowledge before you start.
+- When planning, **always** add a dedicated section "## Remote Repositories to Pack":
+  - Use EXACT format from example below (one command per line with `-` bullet)
+  - Add grep instructions for each repository
+  - **CRITICAL**: Never use code blocks for this list, use plain bullets
+  
+### Example format for repositories:
+- pack_remote_repository https://link-to-repo1
+- pack_remote_repository https://link-to-repo2
+- pack_remote_repository https://link-to-repo3
 
-Task: do such-and-such.
-
-To solve this task, the following tools will be used: a, b, c (full tools list). I confirm that I performed a web search and refreshed my knowledge for these tools.
-
-Based on the updated information, I propose the following solution:
-
-- Solution description, preferably with a diagram and a complete list of required changes.
-
-Before starting work, the agent MUST:
-- repomix remote repo1 https://link-to-repo1
-- repomix remote repo2 https://link-to-repo2
-- repomix remote repo3 https://link-to-repo3
-
-While working, for every method used the agent must perform repomix grep on the library, and after completion provide a report on all methods used and confirm that they were checked via repomix grep.
+- When planning, **always** instruct the agent to do exactly and only what is requested by the user.
+- Test plan requirements:
+  - Agent runs: `bun run fix`
+  - **FORBIDDEN**: Agent must NEVER run dev server (bun run dev, bun run kill:3000)
+  - Plan must say: "User will start dev server with `bun run dev`"
+  - After user confirms server running, agent uses browser to test

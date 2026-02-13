@@ -1,0 +1,93 @@
+---
+description: Enforce Next.js navigation best practices using Link, useRouter from next/navigation, and redirect.
+globs: **/*.{ts,tsx}
+alwaysApply: true
+---
+
+# Next.js Navigation Best Practices
+
+Always use Next.js native navigation tools instead of standard HTML `<a>` tags or legacy `next/router` hooks. This ensures optimal performance, automatic prefetching, and correct behavior in the App Router.
+
+## Core Principles
+
+1.  **Prefer `<Link>`**: Use the `<Link>` component for all standard navigation. It provides automatic prefetching and client-side transitions.
+2.  **Programmatic Navigation**: Use `useRouter` from `next/navigation` only when `<Link>` cannot be used (e.g., navigating after an action).
+3.  **Server-Side Redirects**: Use `redirect()` from `next/navigation` in Server Components, Server Actions, and Route Handlers.
+4.  **No `<a>` Tags**: Never use native `<a>` tags for internal links.
+5.  **Correct Import**: Always import `useRouter` from `next/navigation`, never from `next/router`.
+
+## Examples
+
+### Internal Linking ❌
+
+```tsx
+// Bad: Native anchor tag causes full page reload
+<a href="/dashboard">Go to Dashboard</a>
+
+// Bad: Using router.push for simple links
+<button onClick={() => router.push('/dashboard')}>Go to Dashboard</button>
+```
+
+### Internal Linking ✅
+
+```tsx
+import { Link } from 'next/link';
+
+// Good: Uses Link for client-side navigation and prefetching
+<Link href="/dashboard">Go to Dashboard</Link>
+```
+
+### Programmatic Navigation ❌
+
+```tsx
+// Bad: Wrong import for App Router
+import { useRouter } from 'next/router';
+
+const MyComponent = () => {
+  const router = useRouter();
+  // ...
+};
+```
+
+### Programmatic Navigation ✅
+
+```tsx
+'use client';
+
+import { useRouter } from 'next/navigation';
+
+const MyComponent = () => {
+  const router = useRouter();
+
+  const handleAction = async () => {
+    await performAction();
+    // Good: Programmatic navigation after an event
+    router.push('/success');
+  };
+
+  return <button onClick={handleAction}>Submit</button>;
+};
+```
+
+### Server-Side Redirects ✅
+
+```tsx
+import { redirect } from 'next/navigation';
+
+export default async function Page() {
+  const session = await getSession();
+  
+  if (!session) {
+    // Good: Server-side redirect
+    redirect('/login');
+  }
+  
+  return <div>Protected Content</div>;
+}
+```
+
+## Why?
+
+- **Prefetching**: `<Link>` automatically prefetches the linked route in the background, making transitions feel instant.
+- **Client-Side Routing**: Next.js navigation avoids full page reloads, preserving application state.
+- **App Router Compatibility**: `next/navigation` is specifically designed for the App Router and React Server Components.

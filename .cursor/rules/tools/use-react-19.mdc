@@ -1,4 +1,38 @@
 ---
 alwaysApply: true
 ---
-Remember that you are using React 19. And it slightly different from earlier versions. Keep this in mind when you are writing code.
+Remember that you are using React 19. Be aware of the key differences from previous versions:
+
+## Key Differences & Examples
+
+### Actions
+Asynchronous functions can now be passed directly to `startTransition` to handle form submissions, pending states, error handling, and optimistic updates automatically.
+
+```tsx
+const [isPending, startTransition] = useTransition();
+startTransition(async () => {
+  const error = await updateName(name);
+  if (error) setError(error);
+});
+```
+
+### New Hooks
+- `useActionState`: Simplifies form handling with async actions.
+- `useOptimistic`: Updates UI optimistically while requests complete in the background.
+- `use()`: Reads resources (promises or Context) directly in render.
+
+### Ref as a prop
+Refs can now be used directly as props, eliminating the need for `forwardRef`.
+
+```tsx
+function MyInput({ ref }) {
+  return <input ref={ref} />;
+}
+```
+
+### React Compiler
+Automatically optimizes components with memoization, smart re-rendering, and bundle size improvements without manual optimization.
+
+### Breaking Changes
+- **New JSX Transform Required**: The modern JSX transform must be enabled.
+- Deprecation of old APIs (React 18.3 includes warnings for deprecated features).

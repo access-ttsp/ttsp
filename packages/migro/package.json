@@ -1,0 +1,21 @@
+{
+  "name": "migro",
+  "version": "1.0.0",
+  "description": "A simple SQL migration tool for PostgreSQL and SQLite using Bun.",
+  "main": "migro.ts",
+  "types": "migro.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sql",
+    "migration",
+    "postgresql",
+    "sqlite",
+    "bun"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}

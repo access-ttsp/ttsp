@@ -1,3 +1,43 @@
 ---
 alwaysApply: true
 ---
+Always use `bun` for package management and `bunx` for executing packages, instead of `npm`, `npx`, `yarn`, or `pnpm`.
+
+## Bad Examples ❌
+
+- Installing dependencies:
+
+```bash
+npm install
+yarn add express
+pnpm install
+```
+
+- Running scripts:
+
+```bash
+npm run dev
+npx shadcn-ui add button
+```
+
+## Good Examples ✅
+
+- Installing dependencies:
+
+```bash
+bun install
+bun add express
+```
+
+- Running scripts:
+
+```bash
+bun run dev
+bunx shadcn-ui add button
+```
+
+## Why?
+
+- **Performance**: Bun is significantly faster for package installation and script execution.
+- **Simplicity**: A unified tool for both package management and script execution.
+- **Ecosystem**: Aligns with the project's Bun-first philosophy.

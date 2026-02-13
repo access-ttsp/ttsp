@@ -2,4 +2,4 @@
 alwaysApply: true
 ---
 
-Always use Next.js Server Actions for data mutations instead of fetch.
+Always use Next.js Server Actions for data mutations instead of fetch. Before implementing logic directly in the action, review the codebase to reuse existing logic if it's already implemented.

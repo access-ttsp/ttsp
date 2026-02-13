@@ -1,9 +1,9 @@
 import { Elysia } from "elysia";
 import { authView } from "@/lib/auth-view";
-import { sqliteController } from "./controllers/sqlite-controller";
+import { posts } from "./modules/posts";
 
 export const api = new Elysia({ prefix: "/api" })
-  .use(sqliteController)
+  .use(posts)
   // ...
   // After all
   .all("/auth/*", authView);
