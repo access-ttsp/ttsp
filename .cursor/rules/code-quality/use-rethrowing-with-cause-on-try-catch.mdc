@@ -10,8 +10,10 @@ alwaysApply: false
 - Never return from a `catch` block — exceptions must propagate.
 - Use early validation to prevent errors when possible.
 - If an error is thrown, always rethrow it with:
-  - a meaningful, domain‑specific message
+  - a meaningful, domain-specific message
   - the original error as the `cause`
+- Never add global try/catch. Try/catch blocks must be focused on particular parts of logic.
+- Never add nested try/catch blocks.
 
 ### ✔️ Good
 

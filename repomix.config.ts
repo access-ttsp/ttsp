@@ -1,4 +1,3 @@
-// repomix.config.ts
 import { defineConfig } from "repomix";
 
 export default defineConfig({
@@ -12,14 +11,14 @@ export default defineConfig({
     fileSummary: true,
     directoryStructure: true,
     files: true,
-    removeComments: false,
-    removeEmptyLines: false,
+    removeComments: true,
+    removeEmptyLines: true,
     compress: false,
     topFilesLength: 5,
     showLineNumbers: false,
-    truncateBase64: false,
+    truncateBase64: true,
     copyToClipboard: false,
-    includeFullDirectoryStructure: false,
+    includeFullDirectoryStructure: true,
     tokenCountTree: false,
     git: {
       sortByChanges: true,
@@ -37,7 +36,7 @@ export default defineConfig({
     customPatterns: [],
   },
   security: {
-    enableSecurityCheck: true,
+    enableSecurityCheck: false,
   },
   tokenCount: {
     encoding: "o200k_base",

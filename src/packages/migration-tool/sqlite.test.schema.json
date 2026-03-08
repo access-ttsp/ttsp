@@ -1,0 +1,70 @@
+{
+  "_migrations": [
+    {
+      "name": "id",
+      "type": "integer",
+      "nullable": true,
+      "default": null,
+      "primaryKey": true,
+      "position": 1
+    },
+    {
+      "name": "applied_at",
+      "type": "string",
+      "nullable": true,
+      "default": "CURRENT_TIMESTAMP",
+      "primaryKey": false,
+      "position": 2
+    }
+  ],
+  "alfa_november_bravo": [
+    {
+      "name": "id",
+      "type": "integer",
+      "nullable": true,
+      "default": null,
+      "primaryKey": true,
+      "position": 1
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "nullable": false,
+      "default": null,
+      "primaryKey": false,
+      "position": 2
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "nullable": false,
+      "default": null,
+      "primaryKey": false,
+      "position": 3
+    },
+    {
+      "name": "created_at",
+      "type": "string",
+      "nullable": false,
+      "default": "CURRENT_TIMESTAMP",
+      "primaryKey": false,
+      "position": 4
+    },
+    {
+      "name": "updated_at",
+      "type": "string",
+      "nullable": false,
+      "default": "CURRENT_TIMESTAMP",
+      "primaryKey": false,
+      "position": 5
+    },
+    {
+      "name": "description_new",
+      "type": "string",
+      "nullable": false,
+      "default": null,
+      "primaryKey": false,
+      "position": 6
+    }
+  ]
+}

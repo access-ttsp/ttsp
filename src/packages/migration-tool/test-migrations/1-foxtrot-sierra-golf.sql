@@ -1,0 +1,1 @@
+ALTER TABLE alfa_november_bravo ADD COLUMN description_new TEXT NOT NULL;

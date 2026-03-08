@@ -161,14 +161,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="font-semibold text-base">Acme Inc.</span>
-              </a>
+            <SidebarMenuButton className="data-[slot=sidebar-menu-button]:!p-1.5">
+              <IconInnerShadowTop className="!size-5" />
+              <span className="font-semibold text-base">Acme Inc.</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
