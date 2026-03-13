@@ -13,7 +13,7 @@ export default defineConfig({
     files: true,
     removeComments: true,
     removeEmptyLines: true,
-    compress: false,
+    compress: true,
     topFilesLength: 5,
     showLineNumbers: false,
     truncateBase64: true,

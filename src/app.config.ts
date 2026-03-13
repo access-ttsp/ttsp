@@ -1,12 +1,5 @@
 import "dotenv/config";
-
-function ensureString(envVar: keyof typeof process.env): string {
-  const value = String(process.env[envVar]);
-  if (!value) {
-    throw new Error(`Environment variable ${envVar} is not set`);
-  }
-  return value as string;
-}
+import { ensureString } from "@/lib/utils";
 
 const DATABASE_URL = ensureString("DATABASE_URL");
 const BETTER_AUTH_SECRET = ensureString("BETTER_AUTH_SECRET");

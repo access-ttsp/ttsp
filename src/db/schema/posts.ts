@@ -1,12 +1,13 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, serial, pgTable as table, text } from "drizzle-orm/pg-core";
+
 import {
   createInsertSchema,
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-typebox";
 
-export const posts = sqliteTable("posts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const posts = table("posts", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull().default(""),
   published: integer("published").notNull().default(0),

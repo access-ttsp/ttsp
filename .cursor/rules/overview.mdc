@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+- **Next.js 16** is the main framework.
+- **Elysia** is used as the API framework.
+- **Better-auth** is used for authentication.

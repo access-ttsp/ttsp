@@ -1,15 +1,15 @@
+import { sql } from "bun";
 import { status } from "elysia";
-import { sqlite } from "@/lib/sqlite";
 import type { CreatePostBody, PostNotFound, UpdatePostBody } from "./model";
 
 export const PostsService = {
   async getAllPosts() {
-    const result = await sqlite`SELECT * FROM posts ORDER BY created_at DESC`;
+    const result = await sql`SELECT * FROM posts ORDER BY created_at DESC`;
     return Array.isArray(result) ? result : [];
   },
 
   async getPostById(id: number) {
-    const [post] = await sqlite`SELECT * FROM posts WHERE id = ${id}`;
+    const [post] = await sql`SELECT * FROM posts WHERE id = ${id}`;
 
     if (!post) {
       throw status(404, "Post not found" satisfies PostNotFound);
@@ -20,7 +20,7 @@ export const PostsService = {
 
   async createPost(data: CreatePostBody) {
     const now = Date.now();
-    const [post] = await sqlite`
+    const [post] = await sql`
       INSERT INTO posts (title, content, published, created_at, updated_at) 
       VALUES (${data.title}, ${data.content}, ${data.published}, ${now}, ${now})
       RETURNING *
@@ -30,7 +30,7 @@ export const PostsService = {
 
   async updatePost(id: number, data: UpdatePostBody) {
     const now = Date.now();
-    const [post] = await sqlite`
+    const [post] = await sql`
       UPDATE posts 
       SET title = ${data.title}, content = ${data.content}, published = ${data.published}, updated_at = ${now} 
       WHERE id = ${id}
@@ -45,12 +45,12 @@ export const PostsService = {
   },
 
   async deletePost(id: number) {
-    const [post] = await sqlite`SELECT id FROM posts WHERE id = ${id}`;
+    const [post] = await sql`SELECT id FROM posts WHERE id = ${id}`;
 
     if (!post) {
       throw status(404, "Post not found" satisfies PostNotFound);
     }
 
-    await sqlite`DELETE FROM posts WHERE id = ${id}`;
+    await sql`DELETE FROM posts WHERE id = ${id}`;
   },
 };
