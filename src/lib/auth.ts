@@ -18,7 +18,7 @@ export const auth = betterAuth({
   plugins: [
     nextCookies(),
     admin({
-      adminUserIds: ["uzAfVPIMRpb2IzJVsYHDWWuM2Nl5bWvR"],
+      adminUserIds: [],
     }),
   ],
 });
