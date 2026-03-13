@@ -13,6 +13,9 @@
     "better-auth:db:migrate": "bunx @better-auth/cli migrate",
     "app:db:generate": "drizzle-kit generate",
     "app:db:migrate": "drizzle-kit migrate",
+    "generate": "bun run better-auth:db:generate && bun run app:db:generate",
+    "migrate": "bun run better-auth:db:migrate && bun run app:db:migrate",
+
     "prepare": "husky"
   },
   "dependencies": {
