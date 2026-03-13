@@ -9,13 +9,11 @@
     "start": "bun next start",
     "check": "ultracite check",
     "fix": "ultracite fix",
-    "better-auth:db:generate": "bunx @better-auth/cli generate",
     "better-auth:db:migrate": "bunx @better-auth/cli migrate",
     "app:db:generate": "drizzle-kit generate",
-    "app:db:migrate": "drizzle-kit migrate",
-    "generate": "bun run better-auth:db:generate && bun run app:db:generate",
-    "migrate": "bun run better-auth:db:migrate && bun run app:db:migrate",
-
+    "app:db:migrate": "bun run drizzle.migrator.ts",
+    "generate": "bun run app:db:generate",
+    "migrate": "bun run better-auth:db:migrate && bun run app:db:generate && bun run app:db:migrate",
     "prepare": "husky"
   },
   "dependencies": {
@@ -54,7 +52,6 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.13",
     "@tailwindcss/postcss": "^4.1.18",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/bun": "^1.3.9",
     "@types/node": "^20.19.33",
     "@types/react": "^19.2.14",
