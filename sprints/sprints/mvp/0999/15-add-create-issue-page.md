@@ -18,6 +18,7 @@ Preparation:
 
 Important:
 - **Do not do anything outside the current task.**
-- Before implementing, analyze my solution and state the pros and cons.
+- Before implementing, analyze my solution and state the pros and cons. Display as table Pros | Cons.
+- Dsplay files to modify. File | Modification reason.
 - Do not perform any normalization or similar logic in the action. All of that should be in the service. The action only calls the service and handles errors if any and performs redirects. The action's sole responsibility is to pass parameters to the service and handle the result.
 

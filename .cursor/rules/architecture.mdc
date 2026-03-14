@@ -1,14 +1,20 @@
 ---
 alwaysApply: true
 ---
-- The `users` table in the app database is used to sync IDs with the Better Auth database so constraints can be enforced in the app database. A record is added to the app database `users` table in the registration hook.
+
+## Users
+The `users` table in the app database is used to sync IDs with the Better Auth database so constraints can be enforced in the app database. A record is added to the app database `users` table in the registration hook.
 
 ## Issues 
 **database** src/db/schema/issues.ts
 **module** src/modules/issues
 
 ### Create
-**path** (restricted)/[slug]/projects/[id]/create-issue
+**path** (restricted)/[slug]/projects/[id]/issues/new
 
 ### View
 **path** (restricted)/[slug]/projects/[id]/issues/[issueId]
+
+### List
+**path** (restricted)/[slug]/projects/[id]/issues
+**UI** tanstack table to display issues. Click on row displays issue view.
