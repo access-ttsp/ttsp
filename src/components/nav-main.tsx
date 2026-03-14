@@ -64,7 +64,7 @@ function renderProjectsSubItems(
   return projects.map((p) => (
     <SidebarMenuSubItem key={p.id}>
       <SidebarMenuSubButton asChild>
-        <Link href={`/${currentSlug}/projects/${p.id}`}>
+        <Link href={`/${currentSlug}/projects/${p.id}/issues`}>
           <span>{p.title}</span>
         </Link>
       </SidebarMenuSubButton>
