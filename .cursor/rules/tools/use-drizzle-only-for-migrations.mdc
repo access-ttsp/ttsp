@@ -1,5 +1,0 @@
----
-alwaysApply: true
----
-
-Use Drizzle only for migrations. Not for queries.

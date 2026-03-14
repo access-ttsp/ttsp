@@ -1,5 +1,0 @@
----
-alwaysApply: true
----
-
-Always use SWR for fetching data instead of fetch. With 30 seconds refresh interval.

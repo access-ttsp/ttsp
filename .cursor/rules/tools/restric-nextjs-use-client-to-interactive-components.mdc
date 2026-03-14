@@ -1,5 +1,0 @@
----
-alwaysApply: true
----
-
-Always restrict `use client` to really interactive components. Make it as scope as possible.
