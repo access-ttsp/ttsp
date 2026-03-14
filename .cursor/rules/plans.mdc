@@ -1,0 +1,8 @@
+---
+alwaysApply: true
+---
+- Before creating a plan: MUST read and analyze 3 most recent plans from `.cursor/plans/` (by date in filename or mtime). Follow their structure, sections, and style — the format evolves as the user refines the project.
+- Plans MUST be saved to `.cursor/plans/` in the workspace.
+- Plan filename MUST start with `YYYY-MM-DD_` (today's date). When calling CreatePlan, set `name` to `YYYY-MM-DD short_description` (e.g. `2025-03-15 Move actions`).
+- Show plans in English.
+- After implementation: ask user to test; if they confirm success, commit and push.
