@@ -1,3 +1,4 @@
+import { createTeam } from "@/app/(restricted)/[slug]/teams/new/actions";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,7 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
-import { createTeam } from "@/modules/teams/actions";
 
 export default function NewTeamPage() {
   return (

@@ -3,6 +3,7 @@
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { createProject } from "@/app/(restricted)/[slug]/projects/new/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,11 +15,10 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createProject } from "@/modules/projects/actions";
 import {
-  createProjectFormSchema,
-  type InferCreateProjectFormSchema,
-} from "@/modules/projects/model";
+  type ProjectsInsert,
+  projectsInsertSchema,
+} from "@/db/schema/projects";
 
 interface CreateProjectFormProps {
   teamSlug: string;
@@ -29,15 +29,18 @@ export function CreateProjectForm({ teamSlug }: CreateProjectFormProps) {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<InferCreateProjectFormSchema>({
-    resolver: typeboxResolver(createProjectFormSchema),
+  } = useForm<ProjectsInsert>({
+    resolver: typeboxResolver(projectsInsertSchema),
     defaultValues: {
+      teamId: 0,
       title: "",
       description: "",
+      createdAt: 0,
+      updatedAt: 0,
     },
   });
 
-  const onSubmit = async (data: InferCreateProjectFormSchema) => {
+  const onSubmit = async (data: ProjectsInsert) => {
     try {
       await createProject(teamSlug, {
         title: data.title,

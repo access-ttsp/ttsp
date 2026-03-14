@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
+import type { ProjectListItem } from "@/components/nav-main";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import type { ProjectListItem } from "@/modules/projects/model";
 import type { TeamWithRole } from "@/modules/teams/model";
 
 interface DashboardShellProps {

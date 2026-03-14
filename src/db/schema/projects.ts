@@ -22,3 +22,6 @@ export const projectsTable = table("projects", {
 export const projectsInsertSchema = createInsertSchema(projectsTable);
 export const projectsSelectSchema = createSelectSchema(projectsTable);
 export const projectsUpdateSchema = createUpdateSchema(projectsTable);
+
+export type ProjectsSelect = typeof projectsTable.$inferSelect;
+export type ProjectsInsert = typeof projectsTable.$inferInsert;

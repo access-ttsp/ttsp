@@ -3,6 +3,7 @@
 import { Bot, LayoutDashboard, Settings2, SquareTerminal } from "lucide-react";
 import type * as React from "react";
 import { NavLinks } from "@/components/nav-links";
+import type { ProjectListItem } from "@/components/nav-main";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -14,7 +15,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useSession } from "@/lib/auth-client";
-import type { ProjectListItem } from "@/modules/projects/model";
 import type { TeamWithRole } from "@/modules/teams/model";
 
 // This is sample data for nav items.

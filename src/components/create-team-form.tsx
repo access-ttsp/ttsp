@@ -3,6 +3,7 @@
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { createTeam } from "@/app/(restricted)/[slug]/teams/new/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,7 +15,6 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createTeam } from "@/modules/teams/actions";
 import {
   createTeamFormSchema,
   type InferCreateTeamFormSchema,

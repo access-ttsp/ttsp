@@ -34,7 +34,11 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import type { ProjectListItem } from "@/modules/projects/model";
+
+export interface ProjectListItem {
+  id: number;
+  title: string;
+}
 
 function renderProjectsSubItems(
   item: { title: string; items?: { title: string; url: string }[] },

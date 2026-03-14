@@ -1,12 +1,12 @@
 import { sql } from "bun";
+import type { ProjectsInsert } from "@/db/schema/projects";
 import { TeamsService } from "@/modules/teams/service";
-import type { CreateProjectBody, ProjectListItem } from "./model";
 
 export const ProjectsService = {
   async createProject(
     userId: string,
     teamSlug: string,
-    data: CreateProjectBody
+    data: Pick<ProjectsInsert, "title" | "description">
   ): Promise<{ id: number }> {
     const teams = await TeamsService.getTeamsByUserId(userId);
     const team = teams.find((t) => t.slug === teamSlug);
@@ -43,7 +43,7 @@ export const ProjectsService = {
   async getProjectsByTeamSlug(
     userId: string,
     teamSlug: string
-  ): Promise<ProjectListItem[]> {
+  ): Promise<{ id: number; title: string }[]> {
     const teams = await TeamsService.getTeamsByUserId(userId);
     const team = teams.find((t) => t.slug === teamSlug);
     if (!team) {
@@ -56,7 +56,10 @@ export const ProjectsService = {
       WHERE team_id = ${team.id}
       ORDER BY title ASC
     `;
-    return (Array.isArray(result) ? result : []) as ProjectListItem[];
+    return (Array.isArray(result) ? result : []) as {
+      id: number;
+      title: string;
+    }[];
   },
 
   async getProjectById(

@@ -1,9 +1,10 @@
 "use client";
 
 import { typeboxResolver } from "@hookform/resolvers/typebox";
+import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createIssue } from "@/app/(restricted)/[slug]/projects/[id]/issues/new/actions";
+import { updateIssue } from "@/app/(restricted)/[slug]/projects/[id]/issues/edit/[issueId]/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,53 +24,62 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  createIssueFormSchema,
-  type InferCreateIssueFormSchema,
+  type InferUpdateIssueFormSchema,
+  type IssueView,
+  updateIssueFormSchema,
 } from "@/modules/issues/model";
 
-interface CreateIssueFormProps {
+interface EditIssueFormProps {
+  issue: IssueView;
   projectId: string;
   slug: string;
 }
 
 const ISSUE_STATUSES = ["backlog", "todo", "in progress", "done"] as const;
 
-export function CreateIssueForm({ projectId, slug }: CreateIssueFormProps) {
+export function EditIssueForm({ issue, projectId, slug }: EditIssueFormProps) {
   const {
     register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<InferCreateIssueFormSchema>({
-    resolver: typeboxResolver(createIssueFormSchema),
+  } = useForm<InferUpdateIssueFormSchema>({
+    resolver: typeboxResolver(updateIssueFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      status: "backlog",
+      title: issue.title,
+      description: issue.description ?? "",
+      status: issue.status ?? "backlog",
     },
   });
 
-  const onSubmit = async (data: InferCreateIssueFormSchema) => {
+  const onSubmit = async (data: InferUpdateIssueFormSchema) => {
     try {
-      await createIssue(slug, projectId, {
+      await updateIssue(slug, projectId, String(issue.id), {
         title: data.title,
         description: data.description ?? "",
         status: data.status ?? "backlog",
       });
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to create issue"
+        err instanceof Error ? err.message : "Failed to update issue"
       );
     }
   };
 
   return (
     <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex items-center gap-4">
+        <Button asChild size="sm" variant="ghost">
+          <Link href={`/${slug}/projects/${projectId}/issues/${issue.id}`}>
+            &larr; Back
+          </Link>
+        </Button>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Issue details</CardTitle>
           <CardDescription>
-            Set a title, description and status for the issue.
+            Update the title, description and status for the issue.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -140,9 +150,14 @@ export function CreateIssueForm({ projectId, slug }: CreateIssueFormProps) {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button asChild variant="ghost">
+          <Link href={`/${slug}/projects/${projectId}/issues/${issue.id}`}>
+            Cancel
+          </Link>
+        </Button>
         <Button disabled={isSubmitting} size="lg" type="submit">
-          Create Issue
+          Save
         </Button>
       </div>
     </form>
