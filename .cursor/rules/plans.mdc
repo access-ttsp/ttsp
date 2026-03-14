@@ -5,4 +5,5 @@ alwaysApply: true
 - Plans MUST be saved to `.cursor/plans/` in the workspace.
 - Plan filename MUST start with `YYYY-MM-DD_` (today's date). When calling CreatePlan, set `name` to `YYYY-MM-DD short_description` (e.g. `2025-03-15 Move actions`).
 - Show plans in English.
-- After implementation: ask user to test; if they confirm success, commit and push.
+- Plan cleanup: MUST delete from `.cursor/plans/` any files older than 7 days (by YYYY-MM-DD in filename) or files without `YYYY-MM-DD_` prefix. Every plan MUST include this as the first implementation step (e.g. "1. Cleanup plans folder: delete plans older than 7 days or without YYYY-MM-DD_ prefix").
+- After implementation: MUST ask user to test (list specific checks). MUST NOT commit or push until user explicitly confirms (e.g. "ok", "works", "всё ок"). Only after confirmation — commit and push.
