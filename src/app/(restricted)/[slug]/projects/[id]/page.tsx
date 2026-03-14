@@ -73,9 +73,14 @@ export default async function ProjectPage({
       <div className="flex flex-1 flex-col p-4 pt-0">
         <div className="flex flex-row items-center justify-between gap-4">
           <h1 className="font-semibold text-2xl">{project.title}</h1>
-          <Button asChild size="sm">
-            <Link href={`/${slug}/projects/${id}/issues/new`}>New issue</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/${slug}/projects/${id}/issues`}>Issues</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href={`/${slug}/projects/${id}/issues/new`}>New issue</Link>
+            </Button>
+          </div>
         </div>
         {project.description && (
           <p className="mt-2 text-muted-foreground text-sm">

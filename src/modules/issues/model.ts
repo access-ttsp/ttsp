@@ -6,6 +6,12 @@ export interface CreateIssueBody {
   status?: string;
 }
 
+export interface UpdateIssueBody {
+  title: string;
+  description?: string;
+  status?: string;
+}
+
 export interface IssueView {
   id: number;
   projectId: number;
@@ -23,3 +29,11 @@ export const createIssueFormSchema = Type.Object({
 });
 
 export type InferCreateIssueFormSchema = Static<typeof createIssueFormSchema>;
+
+export const updateIssueFormSchema = Type.Object({
+  title: Type.String({ minLength: 1 }),
+  description: Type.Optional(Type.String()),
+  status: Type.Optional(Type.String()),
+});
+
+export type InferUpdateIssueFormSchema = Static<typeof updateIssueFormSchema>;

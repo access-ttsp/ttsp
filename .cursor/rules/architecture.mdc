@@ -12,6 +12,9 @@ The `users` table in the app database is used to sync IDs with the Better Auth d
 ### Create
 **path** (restricted)/[slug]/projects/[id]/issues/new
 
+### Edit
+**path** (restricted)/[slug]/projects/[id]/issues/edit/[issueId]
+
 ### View
 **path** (restricted)/[slug]/projects/[id]/issues/[issueId]
 

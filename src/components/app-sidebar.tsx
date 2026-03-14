@@ -1,16 +1,9 @@
 "use client";
 
-import {
-  BookOpen,
-  Bot,
-  Folder,
-  LayoutDashboard,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react";
+import { Bot, LayoutDashboard, Settings2, SquareTerminal } from "lucide-react";
 import type * as React from "react";
+import { NavLinks } from "@/components/nav-links";
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
@@ -28,69 +21,29 @@ import type { TeamWithRole } from "@/modules/teams/model";
 const data = {
   navMain: [
     {
-      title: "Projects",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
+      title: "My",
       url: "#",
       icon: Bot,
       items: [
         {
-          title: "Genesis",
+          title: "Notifcations",
           url: "#",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
+          title: "Issues",
           url: "#",
         },
       ],
     },
     {
-      title: "Documentation",
+      title: "Projects",
       url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      icon: SquareTerminal,
+      isActive: true,
+      items: [],
     },
     {
-      title: "Settings",
+      title: "Team Settings",
       url: "#",
       icon: Settings2,
       items: [
@@ -99,15 +52,16 @@ const data = {
           url: "#",
         },
         {
-          title: "Team",
+          title: "Projects",
           url: "#",
         },
         {
-          title: "Billing",
+          title: "Members",
           url: "#",
         },
+
         {
-          title: "Limits",
+          title: "My Profile",
           url: "#",
         },
       ],
@@ -135,13 +89,8 @@ export function AppSidebar({
     avatar: session?.user?.image ?? "",
   };
 
-  const projectsList = [
-    { name: "Dashboard", url: `/${currentSlug}`, icon: LayoutDashboard },
-    ...projects.map((p) => ({
-      name: p.title,
-      url: `/${currentSlug}/projects/${p.id}`,
-      icon: Folder,
-    })),
+  const linksItems = [
+    { title: "Dashboard", url: `/${currentSlug}`, icon: LayoutDashboard },
   ];
 
   return (
@@ -155,7 +104,7 @@ export function AppSidebar({
           items={data.navMain}
           projects={projects}
         />
-        <NavProjects projects={projectsList} />
+        <NavLinks items={linksItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { ProjectListItem } from "@/modules/projects/model";
@@ -16,9 +19,23 @@ export function DashboardShell({
   projects,
   children,
 }: DashboardShellProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <SidebarProvider>
-      <AppSidebar currentSlug={currentSlug} projects={projects} teams={teams} />
+      {mounted ? (
+        <AppSidebar
+          currentSlug={currentSlug}
+          projects={projects}
+          teams={teams}
+        />
+      ) : (
+        <aside
+          aria-hidden
+          className="w-16 shrink-0 border-r bg-sidebar md:w-64"
+        />
+      )}
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
