@@ -39,6 +39,7 @@ export function SignupForm({
       email,
       password,
       name: email.split("@")[0],
+      callbackURL: "/app",
     });
 
     if (error) {
@@ -47,7 +48,7 @@ export function SignupForm({
       return;
     }
 
-    window.location.href = "/dashboard";
+    window.location.href = "/app";
   };
 
   return (

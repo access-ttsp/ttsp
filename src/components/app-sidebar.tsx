@@ -1,19 +1,16 @@
 "use client";
 
 import {
-  AudioWaveform,
   BookOpen,
   Bot,
-  Command,
   Frame,
-  GalleryVerticalEnd,
+  LayoutDashboard,
   Map as MapIcon,
   PieChart,
   Settings2,
   SquareTerminal,
 } from "lucide-react";
 import type * as React from "react";
-
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
@@ -25,31 +22,11 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useSession } from "@/lib/auth-client";
+import type { TeamWithRole } from "@/modules/teams/model";
 
-// This is sample data.
+// This is sample data for nav items.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
     {
       title: "Playground",
@@ -137,7 +114,12 @@ const data = {
       ],
     },
   ],
-  projects: [
+  projects: (currentSlug: string) => [
+    {
+      name: "Dashboard",
+      url: `/${currentSlug}`,
+      icon: LayoutDashboard,
+    },
     {
       name: "Design Engineering",
       url: "#",
@@ -156,18 +138,31 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  teams: TeamWithRole[];
+  currentSlug: string;
+}
+
+export function AppSidebar({ teams, currentSlug, ...props }: AppSidebarProps) {
+  const { data: session } = useSession();
+
+  const user = {
+    name: session?.user?.name ?? "User",
+    email: session?.user?.email ?? "",
+    avatar: session?.user?.image ?? "",
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher currentSlug={currentSlug} teams={teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavProjects projects={data.projects(currentSlug)} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -40,7 +40,7 @@ const navMain = [
 const navSecondary = [
   {
     title: "Back to Dashboard",
-    url: "/dashboard",
+    url: "/app",
     icon: IconArrowLeft,
   },
   {

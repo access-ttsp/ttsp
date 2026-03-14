@@ -31,6 +31,7 @@ export function LoginForm({
     const { error } = await authClient.signIn.email({
       email,
       password,
+      callbackURL: "/app",
     });
 
     if (error) {
@@ -39,7 +40,7 @@ export function LoginForm({
       return;
     }
 
-    window.location.href = "/dashboard";
+    window.location.href = "/app";
   };
 
   return (

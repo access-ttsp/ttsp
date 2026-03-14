@@ -14,8 +14,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TTSP App",
-  description: "TTSP App",
+  title: "ln0 - do the job",
+  description: "Free open source alternative to Linear",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/ln0-icon-512.png",
+  },
 };
 
 export default function RootLayout({

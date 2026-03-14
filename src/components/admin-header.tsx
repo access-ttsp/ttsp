@@ -16,7 +16,7 @@ export function AdminHeader() {
         <h1 className="font-medium text-base">Admin</h1>
         <div className="ml-auto flex items-center gap-2">
           <Button asChild className="hidden sm:flex" size="sm" variant="ghost">
-            <a href="/dashboard">
+            <a href="/app">
               <IconArrowLeft className="size-4" />
               Back to Dashboard
             </a>

@@ -1,9 +1,8 @@
 "use client";
 
-import { ChevronsUpDown, Plus } from "lucide-react";
-import type { ElementType } from "react";
-import { useState } from "react";
-
+import { ChevronsUpDown, Plus, Users } from "lucide-react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,22 +18,16 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import type { TeamWithRole } from "@/modules/teams/model";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string;
-    logo: ElementType;
-    plan: string;
-  }[];
-}) {
+interface TeamSwitcherProps {
+  teams: TeamWithRole[];
+  currentSlug: string;
+}
+
+export function TeamSwitcher({ teams, currentSlug }: TeamSwitcherProps) {
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = useState(teams[0]);
-
-  if (!activeTeam) {
-    return null;
-  }
+  const activeTeam = teams.find((t) => t.slug === currentSlug) ?? teams[0];
 
   return (
     <SidebarMenu>
@@ -46,11 +39,21 @@ export function TeamSwitcher({
               size="lg"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeTeam.logo className="size-4" />
+                {activeTeam ? (
+                  <span className="font-medium text-sm">
+                    {activeTeam.title.charAt(0).toUpperCase()}
+                  </span>
+                ) : (
+                  <Users className="size-4" />
+                )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate font-medium">
+                  {activeTeam?.title ?? "Select team"}
+                </span>
+                <span className="truncate text-xs">
+                  {activeTeam ? activeTeam.role : ""}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -65,24 +68,39 @@ export function TeamSwitcher({
               Teams
             </DropdownMenuLabel>
             {teams.map((team, index) => (
-              <DropdownMenuItem
-                className="gap-2 p-2"
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo className="size-3.5 shrink-0" />
-                </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+              <DropdownMenuItem asChild key={team.id}>
+                <Link
+                  className="flex cursor-pointer gap-2 p-2"
+                  href={`/${team.slug}`}
+                >
+                  <div className="flex size-6 items-center justify-center rounded-md border">
+                    <span className="font-medium text-xs">
+                      {team.title.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex flex-1 items-center justify-between gap-2">
+                    <span>{team.title}</span>
+                    <Badge className="font-normal text-xs" variant="secondary">
+                      {team.role}
+                    </Badge>
+                  </div>
+                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                </Link>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                <Plus className="size-4" />
-              </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
+            <DropdownMenuItem asChild>
+              <Link
+                className="flex cursor-pointer items-center gap-2 p-2"
+                href="/settings/teams/new"
+              >
+                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+                  <Plus className="size-4" />
+                </div>
+                <span className="font-medium text-muted-foreground">
+                  Create team
+                </span>
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
