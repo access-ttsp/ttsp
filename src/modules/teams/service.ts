@@ -44,18 +44,29 @@ export const TeamsService = {
     const description = data.description?.trim() ?? "";
     const now = Math.floor(Date.now() / 1000);
 
+    const teamData = {
+      owner_user_id: userId,
+      title,
+      slug,
+      description,
+      created_at: now,
+      updated_at: now,
+    };
+
     const [team] = await sql.begin(async (tx) => {
       const [inserted] = await tx`
-        INSERT INTO teams (owner_user_id, title, slug, description, created_at, updated_at)
-        VALUES (${userId}, ${title}, ${slug}, ${description}, ${now}, ${now})
+        INSERT INTO teams ${sql(teamData)}
         RETURNING id, title, slug, description
       `;
       if (!inserted) {
         throw new Error("Failed to create team");
       }
       await tx`
-        INSERT INTO team_members (user_id, team_id, role)
-        VALUES (${userId}, ${inserted.id}, 'owner')
+        INSERT INTO team_members ${sql({
+          user_id: userId,
+          team_id: inserted.id,
+          role: "owner",
+        })}
       `;
       return [{ ...inserted, role: "owner" as const }];
     });

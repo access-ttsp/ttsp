@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { auth } from "@/lib/auth";
+import { ProjectsService } from "@/modules/projects/service";
 import { TeamsService } from "@/modules/teams/service";
 
 export default async function TeamSlugLayout({
@@ -30,8 +31,13 @@ export default async function TeamSlugLayout({
     redirect(`/${teams[0].slug}`);
   }
 
+  const projects = await ProjectsService.getProjectsByTeamSlug(
+    session.user.id,
+    slug
+  );
+
   return (
-    <DashboardShell currentSlug={slug} teams={teams}>
+    <DashboardShell currentSlug={slug} projects={projects} teams={teams}>
       {children}
     </DashboardShell>
   );

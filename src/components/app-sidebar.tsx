@@ -3,10 +3,8 @@
 import {
   BookOpen,
   Bot,
-  Frame,
+  Folder,
   LayoutDashboard,
-  Map as MapIcon,
-  PieChart,
   Settings2,
   SquareTerminal,
 } from "lucide-react";
@@ -23,13 +21,14 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useSession } from "@/lib/auth-client";
+import type { ProjectListItem } from "@/modules/projects/model";
 import type { TeamWithRole } from "@/modules/teams/model";
 
 // This is sample data for nav items.
 const data = {
   navMain: [
     {
-      title: "Playground",
+      title: "Projects",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
@@ -114,36 +113,20 @@ const data = {
       ],
     },
   ],
-  projects: (currentSlug: string) => [
-    {
-      name: "Dashboard",
-      url: `/${currentSlug}`,
-      icon: LayoutDashboard,
-    },
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: MapIcon,
-    },
-  ],
 };
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   teams: TeamWithRole[];
   currentSlug: string;
+  projects: ProjectListItem[];
 }
 
-export function AppSidebar({ teams, currentSlug, ...props }: AppSidebarProps) {
+export function AppSidebar({
+  teams,
+  currentSlug,
+  projects,
+  ...props
+}: AppSidebarProps) {
   const { data: session } = useSession();
 
   const user = {
@@ -152,14 +135,27 @@ export function AppSidebar({ teams, currentSlug, ...props }: AppSidebarProps) {
     avatar: session?.user?.image ?? "",
   };
 
+  const projectsList = [
+    { name: "Dashboard", url: `/${currentSlug}`, icon: LayoutDashboard },
+    ...projects.map((p) => ({
+      name: p.title,
+      url: `/${currentSlug}/projects/${p.id}`,
+      icon: Folder,
+    })),
+  ];
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher currentSlug={currentSlug} teams={teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects(currentSlug)} />
+        <NavMain
+          currentSlug={currentSlug}
+          items={data.navMain}
+          projects={projects}
+        />
+        <NavProjects projects={projectsList} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
