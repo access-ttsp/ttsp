@@ -53,10 +53,6 @@ export default async function ProjectPage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={`/${slug}`}>Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href={`/${slug}/projects/new`}>
                   Projects
                 </BreadcrumbLink>

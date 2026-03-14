@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
+import { IssuesTable } from "@/components/issues-table";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,17 +11,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
-import { IssuesService } from "@/modules/issues/service";
 import { ProjectsService } from "@/modules/projects/service";
 
-export default async function ViewIssuePage({
+export default async function IssuesListPage({
   params,
 }: {
-  params: Promise<{ slug: string; id: string; issueId: string }>;
+  params: Promise<{ slug: string; id: string }>;
 }) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -30,20 +28,15 @@ export default async function ViewIssuePage({
     return null;
   }
 
-  const { slug, id, issueId } = await params;
-  const issueIdNum = Number.parseInt(issueId, 10);
-  if (Number.isNaN(issueIdNum)) {
-    notFound();
-  }
-
-  const issue = await IssuesService.getIssueById(session.user.id, issueIdNum);
-  if (!issue) {
+  const { slug, id } = await params;
+  const projectId = Number.parseInt(id, 10);
+  if (Number.isNaN(projectId)) {
     notFound();
   }
 
   const project = await ProjectsService.getProjectById(
     session.user.id,
-    issue.projectId
+    projectId
   );
   if (!project) {
     notFound();
@@ -73,7 +66,7 @@ export default async function ViewIssuePage({
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>{issue.title}</BreadcrumbPage>
+                <BreadcrumbPage>Issues</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -81,29 +74,13 @@ export default async function ViewIssuePage({
       </header>
 
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="flex items-center gap-4">
-          <Button asChild size="sm" variant="ghost">
-            <Link href={`/${slug}/projects/${id}`}>&larr; Back to project</Link>
+        <div className="flex flex-row items-center justify-between gap-4">
+          <h1 className="font-semibold text-2xl">Issues</h1>
+          <Button asChild size="sm">
+            <Link href={`/${slug}/projects/${id}/issues/new`}>New issue</Link>
           </Button>
         </div>
-
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <div className="flex items-center justify-between gap-4">
-              <CardTitle className="text-2xl">{issue.title}</CardTitle>
-              <Badge variant="secondary">{issue.status}</Badge>
-            </div>
-            <div className="text-muted-foreground text-sm">
-              Created: {new Date(issue.createdAt * 1000).toLocaleString()} |
-              Updated: {new Date(issue.updatedAt * 1000).toLocaleString()}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap">
-              {issue.description || "No description."}
-            </p>
-          </CardContent>
-        </Card>
+        <IssuesTable projectId={id} slug={slug} />
       </div>
     </>
   );

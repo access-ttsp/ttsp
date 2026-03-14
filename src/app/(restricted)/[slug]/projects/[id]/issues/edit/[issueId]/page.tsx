@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
+import { EditIssueForm } from "@/components/edit-issue-form";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,15 +9,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 import { IssuesService } from "@/modules/issues/service";
 import { ProjectsService } from "@/modules/projects/service";
 
-export default async function ViewIssuePage({
+export default async function EditIssuePage({
   params,
 }: {
   params: Promise<{ slug: string; id: string; issueId: string }>;
@@ -73,37 +70,23 @@ export default async function ViewIssuePage({
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>{issue.title}</BreadcrumbPage>
+                <BreadcrumbPage>Edit issue</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="flex items-center gap-4">
-          <Button asChild size="sm" variant="ghost">
-            <Link href={`/${slug}/projects/${id}`}>&larr; Back to project</Link>
-          </Button>
-        </div>
-
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <div className="flex items-center justify-between gap-4">
-              <CardTitle className="text-2xl">{issue.title}</CardTitle>
-              <Badge variant="secondary">{issue.status}</Badge>
-            </div>
-            <div className="text-muted-foreground text-sm">
-              Created: {new Date(issue.createdAt * 1000).toLocaleString()} |
-              Updated: {new Date(issue.updatedAt * 1000).toLocaleString()}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap">
-              {issue.description || "No description."}
+      <div className="flex flex-1 flex-col items-center p-4 pt-0">
+        <div className="w-full max-w-2xl">
+          <div className="mb-8 text-center">
+            <h1 className="font-semibold text-2xl">Edit issue</h1>
+            <p className="mt-2 text-muted-foreground text-sm">
+              Update the title, description, or status of this issue.
             </p>
-          </CardContent>
-        </Card>
+          </div>
+          <EditIssueForm issue={issue} projectId={id} slug={slug} />
+        </div>
       </div>
     </>
   );
