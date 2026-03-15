@@ -3,9 +3,32 @@ import { auth } from "@/lib/auth";
 import { authEnsureSession } from "@/lib/ensure-user-in-app-db";
 import { CommentsService } from "@/modules/comments/service";
 import { IssuesService } from "@/modules/issues/service";
-import { issueCommentsParamsSchema, projectIdParamsSchema } from "./model";
+import {
+  issueCommentsParamsSchema,
+  projectIdParamsSchema,
+  reorderIssuesBodySchema,
+} from "./model";
 
 export const projectsRoutes = new Elysia({ prefix: "/projects" })
+  .patch(
+    "/:id/issues",
+    async ({ params: { id }, body, request }) => {
+      const session = await authEnsureSession(
+        request.headers,
+        auth.api.getSession
+      );
+      await IssuesService.updateIssuesPriorities(
+        session.user.id,
+        id,
+        body.issueIds
+      );
+      return { ok: true };
+    },
+    {
+      params: projectIdParamsSchema,
+      body: reorderIssuesBodySchema,
+    }
+  )
   .get(
     "/:id/issues",
     async ({ params: { id }, request }) => {

@@ -16,6 +16,7 @@ export const issuesTable = table("issues", {
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
   status: text("status").notNull().default("backlog"),
+  priority: integer("priority").notNull().default(0),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),
 });

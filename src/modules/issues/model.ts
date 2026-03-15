@@ -18,6 +18,7 @@ export interface IssueView {
   title: string;
   description: string;
   status: string;
+  priority: number;
   createdAt: number;
   updatedAt: number;
 }

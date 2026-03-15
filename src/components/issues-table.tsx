@@ -86,6 +86,7 @@ function formatDate(timestamp: number) {
 }
 
 interface IssuesTableProps {
+  fallbackData?: IssueView[];
   projectId: string;
   slug: string;
 }
@@ -140,6 +141,9 @@ function DraggableRow({
     >
       {row.getVisibleCells().map((cell) => (
         <TableCell
+          className={
+            cell.column.id === "actions" ? "w-10 text-right" : undefined
+          }
           key={cell.id}
           onClick={
             cell.column.id === "drag" || cell.column.id === "actions"
@@ -168,15 +172,20 @@ function DraggableRow({
   );
 }
 
-export function IssuesTable({ projectId, slug }: IssuesTableProps) {
+export function IssuesTable({
+  fallbackData,
+  projectId,
+  slug,
+}: IssuesTableProps) {
   const router = useRouter();
   const url = `/api/projects/${projectId}/issues`;
-  const { data, isLoading } = useSWR<IssueView[]>(url, fetchIssues, {
+  const { data, isLoading, mutate } = useSWR<IssueView[]>(url, fetchIssues, {
+    fallbackData,
     refreshInterval: 30_000,
   });
   const issues = data ?? EMPTY_ISSUES;
 
-  const [orderedIssues, setOrderedIssues] = useState<IssueView[]>([]);
+  const [orderedIssues, setOrderedIssues] = useState<IssueView[]>(() => issues);
   useEffect(() => {
     setOrderedIssues(issues);
   }, [issues]);
@@ -267,14 +276,34 @@ export function IssuesTable({ projectId, slug }: IssuesTableProps) {
     [orderedIssues]
   );
 
-  function handleDragEnd(event: DragEndEvent) {
+  async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-    if (active && over && active.id !== over.id) {
-      setOrderedIssues((data) => {
-        const oldIndex = dataIds.indexOf(active.id);
-        const newIndex = dataIds.indexOf(over.id);
-        return arrayMove(data, oldIndex, newIndex);
+    if (!active) {
+      return;
+    }
+    if (!over) {
+      return;
+    }
+    if (active.id === over.id) {
+      return;
+    }
+    const oldIndex = dataIds.indexOf(active.id);
+    const newIndex = dataIds.indexOf(over.id);
+    const newOrder = arrayMove(orderedIssues, oldIndex, newIndex);
+    setOrderedIssues(newOrder);
+    const issueIds = newOrder.map((i) => i.id);
+    try {
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ issueIds }),
       });
+      if (!res.ok) {
+        throw new Error("Failed to update order");
+      }
+      await mutate(newOrder, false);
+    } catch {
+      setOrderedIssues(issues);
     }
   }
 
@@ -361,7 +390,13 @@ export function IssuesTable({ projectId, slug }: IssuesTableProps) {
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead colSpan={header.colSpan} key={header.id}>
+                    <TableHead
+                      className={
+                        header.column.id === "actions" ? "w-10 text-right" : ""
+                      }
+                      colSpan={header.colSpan}
+                      key={header.id}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -374,7 +409,7 @@ export function IssuesTable({ projectId, slug }: IssuesTableProps) {
               ))}
             </TableHeader>
             <TableBody className="**:data-[slot=table-cell]:first:w-8">
-              {isLoading && (
+              {isLoading && issues.length === 0 && (
                 <TableRow>
                   <TableCell
                     className="h-24 text-center text-muted-foreground"
@@ -384,7 +419,7 @@ export function IssuesTable({ projectId, slug }: IssuesTableProps) {
                   </TableCell>
                 </TableRow>
               )}
-              {!(isLoading || table.getRowModel().rows?.length) && (
+              {!isLoading && issues.length === 0 && (
                 <TableRow>
                   <TableCell
                     className="h-24 text-center"
@@ -394,7 +429,7 @@ export function IssuesTable({ projectId, slug }: IssuesTableProps) {
                   </TableCell>
                 </TableRow>
               )}
-              {!isLoading && table.getRowModel().rows?.length > 0 && (
+              {table.getRowModel().rows?.length > 0 && (
                 <SortableContext
                   items={table.getRowModel().rows.map((row) => row.original.id)}
                   strategy={verticalListSortingStrategy}

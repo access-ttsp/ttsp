@@ -50,6 +50,13 @@
       "when": 1773533361035,
       "tag": "0006_nostalgic_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1773533949336,
+      "tag": "0007_young_namora",
+      "breakpoints": true
     }
   ]
 }

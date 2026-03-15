@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
+import { IssuesService } from "@/modules/issues/service";
 import { ProjectsService } from "@/modules/projects/service";
 
 export default async function IssuesListPage({
@@ -41,6 +42,11 @@ export default async function IssuesListPage({
   if (!project) {
     notFound();
   }
+
+  const initialIssues = await IssuesService.getIssuesByProjectId(
+    session.user.id,
+    projectId
+  );
 
   return (
     <>
@@ -80,7 +86,7 @@ export default async function IssuesListPage({
             <Link href={`/${slug}/projects/${id}/issues/new`}>New issue</Link>
           </Button>
         </div>
-        <IssuesTable projectId={id} slug={slug} />
+        <IssuesTable fallbackData={initialIssues} projectId={id} slug={slug} />
       </div>
     </>
   );

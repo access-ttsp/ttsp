@@ -22,11 +22,18 @@ export const IssuesService = {
     const status = data.status?.trim() ?? "backlog";
     const now = Math.floor(Date.now() / 1000);
 
+    const [maxPriorityRow] = await sql`
+      SELECT COALESCE(MAX(priority), -1) + 1 as next_priority
+      FROM issues WHERE project_id = ${projectId}
+    `;
+    const priority = maxPriorityRow?.next_priority ?? 0;
+
     const issueData = {
       project_id: projectId,
       title,
       description,
       status,
+      priority,
       created_at: now,
       updated_at: now,
     };
@@ -47,7 +54,7 @@ export const IssuesService = {
   ): Promise<IssueView | null> {
     const [issue] = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status,
-        i.created_at as "createdAt", i.updated_at as "updatedAt"
+        i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
       FROM issues i
       JOIN projects p ON i.project_id = p.id
       JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
@@ -62,12 +69,12 @@ export const IssuesService = {
   ): Promise<IssueView[]> {
     const issues = await sql`
       SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status,
-        i.created_at as "createdAt", i.updated_at as "updatedAt"
+        i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
       FROM issues i
       JOIN projects p ON i.project_id = p.id
       JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
       WHERE i.project_id = ${projectId}
-      ORDER BY i.created_at DESC
+      ORDER BY i.priority ASC, i.created_at DESC
     `;
     return (issues ?? []) as IssueView[];
   },
@@ -96,5 +103,23 @@ export const IssuesService = {
       SET title = ${title}, description = ${description}, status = ${status}, updated_at = ${now}
       WHERE id = ${issueId}
     `;
+  },
+
+  async updateIssuesPriorities(
+    userId: string,
+    projectId: number,
+    issueIds: number[]
+  ): Promise<void> {
+    const project = await ProjectsService.getProjectById(userId, projectId);
+    if (!project) {
+      throw new Error("Project not found or access denied");
+    }
+    for (let i = 0; i < issueIds.length; i++) {
+      await sql`
+        UPDATE issues
+        SET priority = ${i}, updated_at = ${Math.floor(Date.now() / 1000)}
+        WHERE id = ${issueIds[i]} AND project_id = ${projectId}
+      `;
+    }
   },
 };
