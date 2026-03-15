@@ -33,7 +33,7 @@ export const IssuesService = {
 
     const [maxPriorityRow] = await sql`
       SELECT COALESCE(MAX(priority), -1) + 1 as next_priority
-      FROM issues WHERE project_id = ${projectId}
+      FROM issues WHERE project_id = ${projectId} AND status_id = ${data.statusId}
     `;
     const priority = maxPriorityRow?.next_priority ?? 0;
 
@@ -85,7 +85,7 @@ export const IssuesService = {
       JOIN projects p ON i.project_id = p.id
       JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
       WHERE i.project_id = ${projectId}
-      ORDER BY i.priority ASC, i.created_at DESC
+      ORDER BY pis.priority ASC, i.priority ASC, i.created_at DESC
     `;
     return (issues ?? []) as IssueView[];
   },
@@ -124,21 +124,129 @@ export const IssuesService = {
     `;
   },
 
-  async updateIssuesPriorities(
+  async updateIssuesPrioritiesInStatus(
     userId: string,
     projectId: number,
+    statusId: number,
     issueIds: number[]
   ): Promise<void> {
     const project = await ProjectsService.getProjectById(userId, projectId);
     if (!project) {
       throw new Error("Project not found or access denied");
     }
+    const statuses = await ProjectStatusesService.getStatusesByProjectId(
+      userId,
+      projectId
+    );
+    const statusBelongsToProject = statuses.some((s) => s.id === statusId);
+    if (!statusBelongsToProject) {
+      throw new Error("Invalid status");
+    }
+    if (issueIds.length === 0) {
+      return;
+    }
+    const now = Math.floor(Date.now() / 1000);
     for (let i = 0; i < issueIds.length; i++) {
       await sql`
         UPDATE issues
-        SET priority = ${i}, updated_at = ${Math.floor(Date.now() / 1000)}
-        WHERE id = ${issueIds[i]} AND project_id = ${projectId}
+        SET priority = ${i}, updated_at = ${now}
+        WHERE id = ${issueIds[i]} AND project_id = ${projectId} AND status_id = ${statusId}
       `;
+    }
+  },
+
+  async moveIssueToStatus(
+    userId: string,
+    projectId: number,
+    issueId: number,
+    targetStatusId: number,
+    targetIndex: number
+  ): Promise<void> {
+    const issue = await this.getIssueById(userId, issueId);
+    if (!issue) {
+      throw new Error("Issue not found or access denied");
+    }
+    if (issue.projectId !== projectId) {
+      throw new Error("Issue does not belong to project");
+    }
+    const statuses = await ProjectStatusesService.getStatusesByProjectId(
+      userId,
+      projectId
+    );
+    const statusBelongsToProject = statuses.some(
+      (s) => s.id === targetStatusId
+    );
+    if (!statusBelongsToProject) {
+      throw new Error("Invalid target status");
+    }
+
+    const sourceStatusId = issue.statusId;
+    const now = Math.floor(Date.now() / 1000);
+
+    if (sourceStatusId === targetStatusId) {
+      const issuesInStatus = await sql`
+        SELECT id FROM issues
+        WHERE project_id = ${projectId} AND status_id = ${targetStatusId}
+        ORDER BY priority ASC, created_at DESC
+      `;
+      const ids = (issuesInStatus ?? []) as { id: number }[];
+      const currentIndex = ids.findIndex((r) => r.id === issueId);
+      if (currentIndex === -1 || currentIndex === targetIndex) {
+        return;
+      }
+      const reordered = [...ids];
+      const [removed] = reordered.splice(currentIndex, 1);
+      reordered.splice(targetIndex, 0, removed);
+      const issueIds = reordered.map((r) => r.id);
+      await this.updateIssuesPrioritiesInStatus(
+        userId,
+        projectId,
+        targetStatusId,
+        issueIds
+      );
+      return;
+    }
+
+    const issuesInTarget = await sql`
+      SELECT id FROM issues
+      WHERE project_id = ${projectId} AND status_id = ${targetStatusId}
+      ORDER BY priority ASC, created_at DESC
+    `;
+    const targetIds = (issuesInTarget ?? []) as { id: number }[];
+    const newOrder = [...targetIds.map((r) => r.id)];
+    newOrder.splice(targetIndex, 0, issueId);
+
+    await sql`
+      UPDATE issues
+      SET status_id = ${targetStatusId}, priority = ${targetIndex}, updated_at = ${now}
+      WHERE id = ${issueId} AND project_id = ${projectId}
+    `;
+
+    for (let i = 0; i < newOrder.length; i++) {
+      if (newOrder[i] === issueId) {
+        continue;
+      }
+      await sql`
+        UPDATE issues
+        SET priority = ${i}, updated_at = ${now}
+        WHERE id = ${newOrder[i]} AND project_id = ${projectId} AND status_id = ${targetStatusId}
+      `;
+    }
+
+    const issuesInSource = await sql`
+      SELECT id FROM issues
+      WHERE project_id = ${projectId} AND status_id = ${sourceStatusId}
+      ORDER BY priority ASC, created_at DESC
+    `;
+    const sourceIds = (issuesInSource ?? []) as { id: number }[];
+    if (sourceIds.length > 0) {
+      const sourceIssueIds = sourceIds.map((r) => r.id);
+      await this.updateIssuesPrioritiesInStatus(
+        userId,
+        projectId,
+        sourceStatusId,
+        sourceIssueIds
+      );
     }
   },
 };

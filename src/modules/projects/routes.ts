@@ -6,6 +6,8 @@ import { IssuesService } from "@/modules/issues/service";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import {
   issueCommentsParamsSchema,
+  issueIdParamsSchema,
+  moveIssueBodySchema,
   projectIdParamsSchema,
   reorderIssuesBodySchema,
 } from "./model";
@@ -35,9 +37,10 @@ export const projectsRoutes = new Elysia({ prefix: "/projects" })
         request.headers,
         auth.api.getSession
       );
-      await IssuesService.updateIssuesPriorities(
+      await IssuesService.updateIssuesPrioritiesInStatus(
         session.user.id,
         id,
+        body.statusId,
         body.issueIds
       );
       return { ok: true };
@@ -45,6 +48,27 @@ export const projectsRoutes = new Elysia({ prefix: "/projects" })
     {
       params: projectIdParamsSchema,
       body: reorderIssuesBodySchema,
+    }
+  )
+  .patch(
+    "/:id/issues/:issueId/move",
+    async ({ params: { id, issueId }, body, request }) => {
+      const session = await authEnsureSession(
+        request.headers,
+        auth.api.getSession
+      );
+      await IssuesService.moveIssueToStatus(
+        session.user.id,
+        id,
+        issueId,
+        body.targetStatusId,
+        body.targetIndex
+      );
+      return { ok: true };
+    },
+    {
+      params: issueIdParamsSchema,
+      body: moveIssueBodySchema,
     }
   )
   .get(

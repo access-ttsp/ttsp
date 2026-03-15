@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { IssuesTablesByStatus } from "@/components/issues-tables-by-status";
+import { IssuesKanban } from "@/components/issues-kanban";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,7 +18,7 @@ import { IssuesService } from "@/modules/issues/service";
 import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
 
-export default async function IssuesListPage({
+export default async function IssuesKanbanPage({
   params,
 }: {
   params: Promise<{ slug: string; id: string }>;
@@ -72,8 +72,14 @@ export default async function IssuesListPage({
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href={`/${slug}/projects/${id}/issues`}>
+                  Issues
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Issues</BreadcrumbPage>
+                <BreadcrumbPage>Kanban</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -83,12 +89,10 @@ export default async function IssuesListPage({
       <div className="flex flex-1 flex-col pt-0 pb-4">
         <div className="flex flex-col gap-4 px-4 lg:px-6">
           <div className="flex flex-row items-center justify-between gap-4">
-            <h1 className="font-semibold text-2xl">Issues</h1>
+            <h1 className="font-semibold text-2xl">Kanban board</h1>
             <div className="flex items-center gap-2">
               <Button asChild size="sm" variant="outline">
-                <Link href={`/${slug}/projects/${id}/issues/kanban`}>
-                  Kanban board
-                </Link>
+                <Link href={`/${slug}/projects/${id}/issues`}>Table view</Link>
               </Button>
               <Button asChild size="sm">
                 <Link href={`/${slug}/projects/${id}/issues/new`}>
@@ -97,7 +101,7 @@ export default async function IssuesListPage({
               </Button>
             </div>
           </div>
-          <IssuesTablesByStatus
+          <IssuesKanban
             fallbackData={initialIssues}
             projectId={id}
             slug={slug}

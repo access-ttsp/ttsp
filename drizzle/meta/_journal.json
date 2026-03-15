@@ -64,6 +64,13 @@
       "when": 1773534000000,
       "tag": "0008_project_issue_statuses",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1773534100000,
+      "tag": "0009_per_status_priority",
+      "breakpoints": true
     }
   ]
 }
