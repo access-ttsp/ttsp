@@ -1,4 +1,5 @@
 import { sql } from "bun";
+import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
 import type { CreateIssueBody, IssueView, UpdateIssueBody } from "./model";
 
@@ -18,8 +19,16 @@ export const IssuesService = {
       throw new Error("Title is required");
     }
 
+    const statuses = await ProjectStatusesService.getStatusesByProjectId(
+      userId,
+      projectId
+    );
+    const statusBelongsToProject = statuses.some((s) => s.id === data.statusId);
+    if (!statusBelongsToProject) {
+      throw new Error("Invalid status");
+    }
+
     const description = data.description?.trim() ?? "";
-    const status = data.status?.trim() ?? "backlog";
     const now = Math.floor(Date.now() / 1000);
 
     const [maxPriorityRow] = await sql`
@@ -32,7 +41,7 @@ export const IssuesService = {
       project_id: projectId,
       title,
       description,
-      status,
+      status_id: data.statusId,
       priority,
       created_at: now,
       updated_at: now,
@@ -53,9 +62,10 @@ export const IssuesService = {
     issueId: number
   ): Promise<IssueView | null> {
     const [issue] = await sql`
-      SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status,
-        i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
+      SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
+        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
       FROM issues i
+      JOIN project_issue_statuses pis ON i.status_id = pis.id
       JOIN projects p ON i.project_id = p.id
       JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
       WHERE i.id = ${issueId}
@@ -68,9 +78,10 @@ export const IssuesService = {
     projectId: number
   ): Promise<IssueView[]> {
     const issues = await sql`
-      SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status,
-        i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
+      SELECT i.id, i.project_id as "projectId", i.title, i.description, i.status_id as "statusId",
+        pis.name as status, i.priority, i.created_at as "createdAt", i.updated_at as "updatedAt"
       FROM issues i
+      JOIN project_issue_statuses pis ON i.status_id = pis.id
       JOIN projects p ON i.project_id = p.id
       JOIN team_members tm ON p.team_id = tm.team_id AND tm.user_id = ${userId}
       WHERE i.project_id = ${projectId}
@@ -94,13 +105,21 @@ export const IssuesService = {
       throw new Error("Title is required");
     }
 
+    const statuses = await ProjectStatusesService.getStatusesByProjectId(
+      userId,
+      issue.projectId
+    );
+    const statusBelongsToProject = statuses.some((s) => s.id === data.statusId);
+    if (!statusBelongsToProject) {
+      throw new Error("Invalid status");
+    }
+
     const description = data.description?.trim() ?? "";
-    const status = data.status?.trim() ?? "backlog";
     const now = Math.floor(Date.now() / 1000);
 
     await sql`
       UPDATE issues
-      SET title = ${title}, description = ${description}, status = ${status}, updated_at = ${now}
+      SET title = ${title}, description = ${description}, status_id = ${data.statusId}, updated_at = ${now}
       WHERE id = ${issueId}
     `;
   },

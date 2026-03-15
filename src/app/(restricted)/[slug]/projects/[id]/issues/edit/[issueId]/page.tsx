@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 import { IssuesService } from "@/modules/issues/service";
+import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
 
 export default async function EditIssuePage({
@@ -45,6 +46,11 @@ export default async function EditIssuePage({
   if (!project) {
     notFound();
   }
+
+  const projectStatuses = await ProjectStatusesService.getStatusesByProjectId(
+    session.user.id,
+    issue.projectId
+  );
 
   return (
     <>
@@ -85,7 +91,12 @@ export default async function EditIssuePage({
               Update the title, description, or status of this issue.
             </p>
           </div>
-          <EditIssueForm issue={issue} projectId={id} slug={slug} />
+          <EditIssueForm
+            issue={issue}
+            projectId={id}
+            projectStatuses={projectStatuses}
+            slug={slug}
+          />
         </div>
       </div>
     </>

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { authEnsureSession } from "@/lib/ensure-user-in-app-db";
 import { CommentsService } from "@/modules/comments/service";
 import { IssuesService } from "@/modules/issues/service";
+import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import {
   issueCommentsParamsSchema,
   projectIdParamsSchema,
@@ -10,6 +11,23 @@ import {
 } from "./model";
 
 export const projectsRoutes = new Elysia({ prefix: "/projects" })
+  .get(
+    "/:id/statuses",
+    async ({ params: { id }, request }) => {
+      const session = await authEnsureSession(
+        request.headers,
+        auth.api.getSession
+      );
+      const statuses = await ProjectStatusesService.getStatusesByProjectId(
+        session.user.id,
+        id
+      );
+      return statuses;
+    },
+    {
+      params: projectIdParamsSchema,
+    }
+  )
   .patch(
     "/:id/issues",
     async ({ params: { id }, body, request }) => {

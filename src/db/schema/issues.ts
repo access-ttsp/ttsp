@@ -6,6 +6,7 @@ import {
   createUpdateSchema,
 } from "drizzle-typebox";
 
+import { projectIssueStatusesTable } from "./project-issue-statuses";
 import { projectsTable } from "./projects";
 
 export const issuesTable = table("issues", {
@@ -13,9 +14,11 @@ export const issuesTable = table("issues", {
   projectId: integer("project_id")
     .notNull()
     .references(() => projectsTable.id, { onDelete: "cascade" }),
+  statusId: integer("status_id")
+    .notNull()
+    .references(() => projectIssueStatusesTable.id, { onDelete: "restrict" }),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
-  status: text("status").notNull().default("backlog"),
   priority: integer("priority").notNull().default(0),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),

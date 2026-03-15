@@ -4,6 +4,7 @@ import { typeboxResolver } from "@hookform/resolvers/typebox";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import useSWR from "swr";
 import { updateIssue } from "@/app/(restricted)/[slug]/projects/[id]/issues/edit/[issueId]/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,16 +29,35 @@ import {
   type IssueView,
   updateIssueFormSchema,
 } from "@/modules/issues/model";
+import type { ProjectStatusView } from "@/modules/project-statuses/service";
 
 interface EditIssueFormProps {
   issue: IssueView;
   projectId: string;
+  projectStatuses: ProjectStatusView[];
   slug: string;
 }
 
-const ISSUE_STATUSES = ["backlog", "todo", "in progress", "done"] as const;
+async function fetchStatuses(url: string): Promise<ProjectStatusView[]> {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error("Failed to fetch statuses");
+  }
+  return res.json();
+}
 
-export function EditIssueForm({ issue, projectId, slug }: EditIssueFormProps) {
+export function EditIssueForm({
+  issue,
+  projectId,
+  projectStatuses,
+  slug,
+}: EditIssueFormProps) {
+  const { data: statuses } = useSWR(
+    `/api/projects/${projectId}/statuses`,
+    fetchStatuses,
+    { fallbackData: projectStatuses }
+  );
+
   const {
     register,
     handleSubmit,
@@ -48,7 +68,7 @@ export function EditIssueForm({ issue, projectId, slug }: EditIssueFormProps) {
     defaultValues: {
       title: issue.title,
       description: issue.description ?? "",
-      status: issue.status ?? "backlog",
+      statusId: issue.statusId,
     },
   });
 
@@ -57,7 +77,7 @@ export function EditIssueForm({ issue, projectId, slug }: EditIssueFormProps) {
       await updateIssue(slug, projectId, String(issue.id), {
         title: data.title,
         description: data.description ?? "",
-        status: data.status ?? "backlog",
+        statusId: data.statusId,
       });
     } catch (err) {
       toast.error(
@@ -113,36 +133,38 @@ export function EditIssueForm({ issue, projectId, slug }: EditIssueFormProps) {
                 </span>
               )}
             </Field>
-            <Field data-invalid={!!errors.status}>
+            <Field data-invalid={!!errors.statusId}>
               <FieldLabel htmlFor="status">Status</FieldLabel>
               <Controller
                 control={control}
-                name="status"
+                name="statusId"
                 render={({ field }) => (
                   <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? "backlog"}
+                    onValueChange={(v) => field.onChange(Number(v))}
+                    value={
+                      field.value != null ? String(field.value) : undefined
+                    }
                   >
                     <SelectTrigger
-                      aria-invalid={!!errors.status}
+                      aria-invalid={!!errors.statusId}
                       className="w-full"
                       id="status"
                     >
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ISSUE_STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
+                      {statuses?.map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>
+                          {s.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 )}
               />
-              {errors.status && (
+              {errors.statusId && (
                 <span className="text-destructive text-sm">
-                  {errors.status.message}
+                  {errors.statusId.message}
                 </span>
               )}
             </Field>

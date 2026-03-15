@@ -37,6 +37,22 @@ export const ProjectsService = {
     if (!project) {
       throw new Error("Failed to create project");
     }
+
+    const defaultStatuses = [
+      { name: "backlog", priority: 0, is_default: true },
+      { name: "todo", priority: 1, is_default: false },
+      { name: "in progress", priority: 2, is_default: false },
+      { name: "in testing", priority: 3, is_default: false },
+      { name: "reopened", priority: 4, is_default: false },
+      { name: "done", priority: 5, is_default: false },
+    ];
+    for (const s of defaultStatuses) {
+      await sql`
+        INSERT INTO project_issue_statuses (project_id, name, priority, is_default)
+        VALUES (${project.id}, ${s.name}, ${s.priority}, ${s.is_default})
+      `;
+    }
+
     return { id: project.id };
   },
 

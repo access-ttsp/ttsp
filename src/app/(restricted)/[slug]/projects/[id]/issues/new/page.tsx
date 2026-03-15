@@ -12,6 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
+import { ProjectStatusesService } from "@/modules/project-statuses/service";
 import { ProjectsService } from "@/modules/projects/service";
 
 export default async function NewIssuePage({
@@ -39,6 +40,11 @@ export default async function NewIssuePage({
   if (!project) {
     notFound();
   }
+
+  const projectStatuses = await ProjectStatusesService.getStatusesByProjectId(
+    session.user.id,
+    projectId
+  );
 
   return (
     <>
@@ -80,7 +86,11 @@ export default async function NewIssuePage({
               project.
             </p>
           </div>
-          <CreateIssueForm projectId={id} slug={slug} />
+          <CreateIssueForm
+            projectId={id}
+            projectStatuses={projectStatuses}
+            slug={slug}
+          />
         </div>
       </div>
     </>
