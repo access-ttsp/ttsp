@@ -1,31 +1,15 @@
 "use client";
 
-import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  DragOverlay,
-  type DragStartEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useDraggable,
-  useDroppable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
 import { IconGripVertical } from "@tabler/icons-react";
-import Link from "next/link";
-import { useCallback, useId, useMemo, useState } from "react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo } from "react";
+import { type BoardData, type BoardItem, Kanban } from "react-kanban-kit";
 import useSWR from "swr";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { IssueView } from "@/modules/issues/model";
 import type { ProjectStatusView } from "@/modules/project-statuses/service";
-
-const EMPTY_ISSUES: IssueView[] = [];
-const EMPTY_STATUSES: ProjectStatusView[] = [];
 
 function formatDate(timestamp: number) {
   return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -33,6 +17,20 @@ function formatDate(timestamp: number) {
     month: "short",
     day: "numeric",
   });
+}
+
+const EMPTY_ISSUES: IssueView[] = [];
+const EMPTY_STATUSES: ProjectStatusView[] = [];
+
+const STATUS_PREFIX = "status-";
+const ISSUE_PREFIX = "issue-";
+
+function parseStatusId(id: string): number {
+  return Number.parseInt(id.slice(STATUS_PREFIX.length), 10);
+}
+
+function parseIssueId(id: string): number {
+  return Number.parseInt(id.slice(ISSUE_PREFIX.length), 10);
 }
 
 interface IssuesKanbanProps {
@@ -53,169 +51,13 @@ async function fetchIssues(url: string): Promise<IssueView[]> {
   return res.json();
 }
 
-const COLUMN_PREFIX = "column-";
-const CARD_DROP_PREFIX = "card-drop-";
-
-function getTargetFromOverId(
-  overId: string,
-  issuesByStatus: Map<number, IssueView[]>
-): { statusId: number; index: number } | null {
-  if (overId.startsWith(COLUMN_PREFIX)) {
-    const statusId = Number.parseInt(overId.slice(COLUMN_PREFIX.length), 10);
-    if (Number.isNaN(statusId)) {
-      return null;
-    }
-    const columnIssues = issuesByStatus.get(statusId) ?? [];
-    return { statusId, index: columnIssues.length };
-  }
-  if (overId.startsWith(CARD_DROP_PREFIX)) {
-    const issueId = Number.parseInt(overId.slice(CARD_DROP_PREFIX.length), 10);
-    if (Number.isNaN(issueId)) {
-      return null;
-    }
-    for (const [statusId, columnIssues] of issuesByStatus) {
-      const idx = columnIssues.findIndex((i) => i.id === issueId);
-      if (idx >= 0) {
-        return { statusId, index: idx };
-      }
-    }
-    return null;
-  }
-  return null;
-}
-
-function KanbanCard({
-  issue,
-  statusId,
-  index,
-  slug,
-  projectId,
-}: {
-  issue: IssueView;
-  statusId: number;
-  index: number;
-  slug: string;
-  projectId: string;
-}) {
-  const {
-    attributes,
-    isDragging,
-    listeners,
-    setNodeRef: setDragRef,
-  } = useDraggable({
-    id: issue.id,
-    data: { type: "card" as const, statusId, index },
-  });
-  const { setNodeRef: setDropRef, isOver } = useDroppable({
-    id: `${CARD_DROP_PREFIX}${issue.id}`,
-    data: { type: "card" as const, statusId, index },
-  });
-  const setNodeRef = useCallback(
-    (node: HTMLElement | null) => {
-      setDragRef(node);
-      setDropRef(node);
-    },
-    [setDragRef, setDropRef]
-  );
-
-  return (
-    <Link
-      className="flex cursor-pointer items-start gap-2 rounded-lg border bg-card p-3 text-card-foreground shadow-sm transition-all duration-200 ease-out hover:bg-muted/50 hover:shadow-md data-[dragging=true]:opacity-40 data-[over=true]:ring-2 data-[over=true]:ring-primary/30"
-      data-dragging={isDragging}
-      data-over={isOver}
-      href={`/${slug}/projects/${projectId}/issues/${issue.id}`}
-      ref={setNodeRef}
-    >
-      <Button
-        {...attributes}
-        {...listeners}
-        className="size-6 shrink-0 cursor-grab text-muted-foreground hover:bg-transparent active:cursor-grabbing"
-        onClick={(e) => e.stopPropagation()}
-        size="icon"
-        variant="ghost"
-      >
-        <IconGripVertical className="size-3.5" />
-        <span className="sr-only">Drag to reorder</span>
-      </Button>
-      <div className="min-w-0 flex-1">
-        <span className="font-medium">{issue.title}</span>
-        <div className="mt-1 text-muted-foreground text-xs">
-          {formatDate(issue.createdAt)}
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function KanbanColumn({
-  status,
-  issues,
-  slug,
-  projectId,
-  isOver,
-  setNodeRef,
-}: {
-  status: ProjectStatusView;
-  issues: IssueView[];
-  slug: string;
-  projectId: string;
-  isOver: boolean;
-  setNodeRef: (node: HTMLElement | null) => void;
-}) {
-  return (
-    <div
-      className="flex min-w-[280px] flex-1 flex-col rounded-lg border bg-muted/30 p-3 transition-all duration-200 ease-out data-[over=true]:bg-muted/60 data-[over=true]:ring-1 data-[over=true]:ring-primary/20"
-      data-over={isOver}
-      ref={setNodeRef}
-    >
-      <div className="mb-2 flex items-center gap-2">
-        <Badge className="text-muted-foreground" variant="outline">
-          {status.name}
-        </Badge>
-        <span className="text-muted-foreground text-sm">
-          {issues.length} issue(s)
-        </span>
-      </div>
-      <div className="flex min-h-[80px] flex-col gap-2">
-        {issues.map((issue, index) => (
-          <KanbanCard
-            index={index}
-            issue={issue}
-            key={issue.id}
-            projectId={projectId}
-            slug={slug}
-            statusId={status.id}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CardOverlayContent({ issue }: { issue: IssueView }) {
-  return (
-    <div className="flex cursor-grab items-start gap-2 rounded-lg border bg-card p-3 text-card-foreground shadow-xl ring-2 ring-primary/20">
-      <div className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">
-        <IconGripVertical className="size-3.5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <span className="font-medium">{issue.title}</span>
-        <div className="mt-1 text-muted-foreground text-xs">
-          {formatDate(issue.createdAt)}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function IssuesKanban({
   fallbackData,
   projectId,
   slug,
   statuses,
 }: IssuesKanbanProps) {
-  const sortableId = useId();
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const router = useRouter();
   const url = `/api/projects/${projectId}/issues`;
   const { data, isLoading, mutate } = useSWR<IssueView[]>(url, fetchIssues, {
     fallbackData,
@@ -223,12 +65,6 @@ export function IssuesKanban({
   });
   const issues = data ?? EMPTY_ISSUES;
   const statusList = statuses ?? EMPTY_STATUSES;
-
-  const sensors = useSensors(
-    useSensor(MouseSensor, {}),
-    useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
-  );
 
   const issuesByStatus = useMemo(() => {
     const map = new Map<number, IssueView[]>();
@@ -248,6 +84,50 @@ export function IssuesKanban({
     }
     return map;
   }, [issues, statusList]);
+
+  const dataSource: BoardData = useMemo(() => {
+    const root: BoardItem = {
+      id: "root",
+      title: "Root",
+      children: statusList.map((s) => `${STATUS_PREFIX}${s.id}`),
+      totalChildrenCount: statusList.length,
+      parentId: null,
+    };
+
+    const columnEntries = statusList.map((status) => {
+      const columnIssues = issuesByStatus.get(status.id) ?? [];
+      const childIds = columnIssues.map((i) => `${ISSUE_PREFIX}${i.id}`);
+      return [
+        `${STATUS_PREFIX}${status.id}`,
+        {
+          id: `${STATUS_PREFIX}${status.id}`,
+          title: status.name,
+          children: childIds,
+          totalChildrenCount: childIds.length,
+          parentId: "root",
+        } as BoardItem,
+      ];
+    });
+
+    const cardEntries = issues.map((issue) => [
+      `${ISSUE_PREFIX}${issue.id}`,
+      {
+        id: `${ISSUE_PREFIX}${issue.id}`,
+        title: issue.title,
+        parentId: `${STATUS_PREFIX}${issue.statusId}`,
+        children: [],
+        totalChildrenCount: 0,
+        type: "card" as const,
+        content: { issue },
+      } as BoardItem,
+    ]);
+
+    return {
+      root,
+      ...Object.fromEntries(columnEntries),
+      ...Object.fromEntries(cardEntries),
+    };
+  }, [issues, statusList, issuesByStatus]);
 
   const handleReorder = useCallback(
     async (
@@ -275,7 +155,7 @@ export function IssuesKanban({
 
   const handleMove = useCallback(
     async (
-      activeId: number,
+      issueId: number,
       targetStatusId: number,
       targetIndex: number,
       optimistic: IssueView[]
@@ -283,7 +163,7 @@ export function IssuesKanban({
       mutate(optimistic, false);
       try {
         const res = await fetch(
-          `/api/projects/${projectId}/issues/${activeId}/move`,
+          `/api/projects/${projectId}/issues/${issueId}/move`,
           {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -301,42 +181,29 @@ export function IssuesKanban({
     [issues, projectId, mutate]
   );
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    setActiveId(Number(event.active.id));
-  }, []);
-
-  const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      setActiveId(null);
-      const { active, over } = event;
-      if (!(active?.id && over?.id) || active.id === over.id) {
-        return;
-      }
-
-      const activeId = Number(active.id);
-      const overId = String(over.id);
-      const sourceStatusId = (active.data.current as { statusId?: number })
-        ?.statusId;
-      if (sourceStatusId == null) {
-        return;
-      }
-
-      const target = getTargetFromOverId(overId, issuesByStatus);
-      if (!target) {
-        return;
-      }
-
-      const { statusId: targetStatusId, index: targetIndex } = target;
+  const onCardMove = useCallback(
+    (move: {
+      cardId: string;
+      fromColumnId: string;
+      toColumnId: string;
+      taskAbove: string | null;
+      taskBelow: string | null;
+      position: number;
+    }) => {
+      const issueId = parseIssueId(move.cardId);
+      const sourceStatusId = parseStatusId(move.fromColumnId);
+      const targetStatusId = parseStatusId(move.toColumnId);
+      const { position } = move;
 
       if (sourceStatusId === targetStatusId) {
         const sourceIssues = issuesByStatus.get(sourceStatusId) ?? [];
-        const oldIndex = sourceIssues.findIndex((i) => i.id === activeId);
-        if (oldIndex < 0 || oldIndex === targetIndex) {
+        const oldIndex = sourceIssues.findIndex((i) => i.id === issueId);
+        if (oldIndex < 0 || oldIndex === position) {
           return;
         }
         const reordered = [...sourceIssues];
         const [removed] = reordered.splice(oldIndex, 1);
-        reordered.splice(targetIndex, 0, removed);
+        reordered.splice(position, 0, removed);
         const issueIds = reordered.map((i) => i.id);
         const optimistic = issues.map((i) => {
           if (i.statusId !== sourceStatusId) {
@@ -345,57 +212,151 @@ export function IssuesKanban({
           const newIdx = reordered.findIndex((r) => r.id === i.id);
           return newIdx < 0 ? i : { ...i, priority: newIdx };
         });
-        await handleReorder(sourceStatusId, issueIds, optimistic);
+        mutate(optimistic, false);
+        handleReorder(sourceStatusId, issueIds, optimistic).catch(
+          () => undefined
+        );
         return;
       }
 
-      const optimistic = issues.map((i) =>
-        i.id !== activeId ? i : { ...i, statusId: targetStatusId }
+      const movedIssue = issues.find((i) => i.id === issueId);
+      if (!movedIssue) {
+        return;
+      }
+
+      const sourceIssues = issuesByStatus.get(sourceStatusId) ?? [];
+      const targetIssues = issuesByStatus.get(targetStatusId) ?? [];
+      const newTargetIssues = [...targetIssues];
+      newTargetIssues.splice(position, 0, movedIssue);
+      const newSourceIssues = sourceIssues.filter((i) => i.id !== issueId);
+
+      const optimistic = issues.map((i) => {
+        if (i.id === issueId) {
+          return { ...i, statusId: targetStatusId, priority: position };
+        }
+        if (i.statusId === sourceStatusId) {
+          const newIdx = newSourceIssues.findIndex((s) => s.id === i.id);
+          return newIdx >= 0 ? { ...i, priority: newIdx } : i;
+        }
+        if (i.statusId === targetStatusId) {
+          const newIdx = newTargetIssues.findIndex((t) => t.id === i.id);
+          return newIdx >= 0 ? { ...i, priority: newIdx } : i;
+        }
+        return i;
+      });
+
+      mutate(optimistic, false);
+      handleMove(issueId, targetStatusId, position, optimistic).catch(
+        () => undefined
       );
-      await handleMove(activeId, targetStatusId, targetIndex, optimistic);
     },
-    [issues, issuesByStatus, handleReorder, handleMove]
+    [issues, issuesByStatus, handleReorder, handleMove, mutate]
   );
 
-  const activeIssue = useMemo(
-    () => (activeId != null ? issues.find((i) => i.id === activeId) : null),
-    [activeId, issues]
+  const onCardClick = useCallback(
+    (_e: React.MouseEvent, card: BoardItem) => {
+      const issue = (card.content as { issue?: IssueView })?.issue;
+      if (issue) {
+        router.push(`/${slug}/projects/${projectId}/issues/${issue.id}`);
+      }
+    },
+    [slug, projectId, router]
+  );
+
+  const configMap = useMemo(
+    () => ({
+      card: {
+        render: ({
+          data,
+        }: {
+          data: BoardItem;
+          column: BoardItem;
+          index: number;
+          isDraggable: boolean;
+        }) => {
+          const issue = (data.content as { issue?: IssueView })?.issue;
+          if (!issue) {
+            return null;
+          }
+          return (
+            <motion.div
+              className="flex cursor-pointer items-start gap-2 rounded-lg border bg-card p-3 text-card-foreground shadow-sm transition-colors duration-200 hover:bg-muted/50 hover:shadow-md"
+              layout
+              transition={{ layout: { duration: 0.2, ease: "easeOut" } }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              <div className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">
+                <IconGripVertical className="size-3.5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="font-medium">{data.title}</span>
+                <div className="mt-1 text-muted-foreground text-xs">
+                  {formatDate(issue.createdAt)}
+                </div>
+              </div>
+            </motion.div>
+          );
+        },
+        isDraggable: true,
+      },
+    }),
+    []
   );
 
   return (
-    <div className="flex w-full flex-col gap-4">
-      <DndContext
-        collisionDetection={closestCenter}
-        id={sortableId}
-        onDragEnd={handleDragEnd}
-        onDragStart={handleDragStart}
-        sensors={sensors}
-      >
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {statusList.map((status) => {
-            const columnId = `${COLUMN_PREFIX}${status.id}`;
-            const issuesInColumn = issuesByStatus.get(status.id) ?? [];
-            return (
-              <DroppableColumn
-                columnId={columnId}
-                issues={issuesInColumn}
-                key={status.id}
-                projectId={projectId}
-                slug={slug}
-                status={status}
-              />
-            );
-          })}
-        </div>
-        <DragOverlay
-          dropAnimation={{
-            duration: 200,
-            easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
-          }}
-        >
-          {activeIssue ? <CardOverlayContent issue={activeIssue} /> : null}
-        </DragOverlay>
-      </DndContext>
+    <div className="flex min-h-[400px] w-full flex-col gap-4">
+      <Kanban
+        cardsGap={8}
+        columnWrapperClassName={() =>
+          "flex min-w-[280px] flex-1 flex-col rounded-lg border bg-muted/30 p-3 transition-colors duration-200"
+        }
+        configMap={configMap}
+        dataSource={dataSource}
+        onCardClick={onCardClick}
+        onCardMove={onCardMove}
+        renderCardDragPreview={(card) => {
+          const issue = (card.content as { issue?: IssueView })?.issue;
+          if (!issue) {
+            return null;
+          }
+          return (
+            <motion.div
+              animate={{ scale: 1.02, opacity: 1 }}
+              className="flex cursor-grab items-start gap-2 rounded-lg border bg-card p-3 text-card-foreground shadow-xl ring-2 ring-primary/20"
+              initial={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className="flex size-6 shrink-0 items-center justify-center text-muted-foreground">
+                <IconGripVertical className="size-3.5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="font-medium">{card.title}</span>
+                <div className="mt-1 text-muted-foreground text-xs">
+                  {formatDate(issue.createdAt)}
+                </div>
+              </div>
+            </motion.div>
+          );
+        }}
+        renderColumnHeader={(column) => {
+          const statusId = parseStatusId(column.id);
+          const status = statusList.find((s) => s.id === statusId);
+          const count = column.totalChildrenCount ?? 0;
+          return (
+            <div className="mb-2 flex items-center gap-2">
+              <Badge className="text-muted-foreground" variant="outline">
+                {status?.name ?? column.title}
+              </Badge>
+              <span className="text-muted-foreground text-sm">
+                {count} issue(s)
+              </span>
+            </div>
+          );
+        }}
+        rootClassName="flex gap-4 overflow-x-auto pb-4"
+        virtualization={false}
+      />
       {isLoading && issues.length === 0 && (
         <p className="text-center text-muted-foreground">Loading issues...</p>
       )}
@@ -403,34 +364,5 @@ export function IssuesKanban({
         <p className="text-center text-muted-foreground">No issues found.</p>
       )}
     </div>
-  );
-}
-
-function DroppableColumn({
-  columnId,
-  status,
-  issues,
-  slug,
-  projectId,
-}: {
-  columnId: string;
-  status: ProjectStatusView;
-  issues: IssueView[];
-  slug: string;
-  projectId: string;
-}) {
-  const { isOver, setNodeRef } = useDroppable({
-    id: columnId,
-    data: { type: "column" as const, statusId: status.id },
-  });
-  return (
-    <KanbanColumn
-      isOver={isOver}
-      issues={issues}
-      projectId={projectId}
-      setNodeRef={setNodeRef}
-      slug={slug}
-      status={status}
-    />
   );
 }
