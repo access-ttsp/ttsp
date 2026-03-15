@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CommentsList } from "@/components/comments-list";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -15,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
+import { CommentsService } from "@/modules/comments/service";
 import { IssuesService } from "@/modules/issues/service";
 import { ProjectsService } from "@/modules/projects/service";
 
@@ -48,6 +50,11 @@ export default async function ViewIssuePage({
   if (!project) {
     notFound();
   }
+
+  const comments = await CommentsService.getCommentsByIssueId(
+    session.user.id,
+    issueIdNum
+  );
 
   return (
     <>
@@ -104,6 +111,14 @@ export default async function ViewIssuePage({
             </p>
           </CardContent>
         </Card>
+
+        <CommentsList
+          currentUserId={session.user.id}
+          initialComments={comments}
+          issueId={issueId}
+          projectId={id}
+          slug={slug}
+        />
       </div>
     </>
   );
