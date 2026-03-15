@@ -79,14 +79,20 @@ export default async function IssuesListPage({
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="flex flex-row items-center justify-between gap-4">
-          <h1 className="font-semibold text-2xl">Issues</h1>
-          <Button asChild size="sm">
-            <Link href={`/${slug}/projects/${id}/issues/new`}>New issue</Link>
-          </Button>
+      <div className="flex flex-1 flex-col pt-0 pb-4">
+        <div className="flex flex-col gap-4 px-4 lg:px-6">
+          <div className="flex flex-row items-center justify-between gap-4">
+            <h1 className="font-semibold text-2xl">Issues</h1>
+            <Button asChild size="sm">
+              <Link href={`/${slug}/projects/${id}/issues/new`}>New issue</Link>
+            </Button>
+          </div>
+          <IssuesTable
+            fallbackData={initialIssues}
+            projectId={id}
+            slug={slug}
+          />
         </div>
-        <IssuesTable fallbackData={initialIssues} projectId={id} slug={slug} />
       </div>
     </>
   );
