@@ -315,7 +315,7 @@ function StatusTable({
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
-          <Table>
+          <Table className="table-fixed">
             <TableHeader className="bg-muted">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -323,12 +323,15 @@ function StatusTable({
                     <TableHead
                       className={(() => {
                         if (header.column.id === "actions") {
-                          return "w-10 text-right";
+                          return "w-10 min-w-10 shrink-0 text-right";
                         }
                         if (header.column.id === "createdAt") {
-                          return "w-1 whitespace-nowrap";
+                          return "w-24 shrink-0 whitespace-nowrap";
                         }
-                        return "";
+                        if (header.column.id === "drag") {
+                          return "w-8 shrink-0";
+                        }
+                        return "min-w-0";
                       })()}
                       colSpan={header.colSpan}
                       key={header.id}
@@ -347,12 +350,12 @@ function StatusTable({
             <TableBody className="**:data-[slot=table-cell]:first:w-8">
               {issues.length === 0 ? (
                 <TableRow>
-                  <TableCell className="w-8" />
-                  <TableCell className="h-16 text-muted-foreground">
+                  <TableCell className="w-8 shrink-0" />
+                  <TableCell className="h-16 min-w-0 text-muted-foreground">
                     No issues
                   </TableCell>
-                  <TableCell className="w-1 whitespace-nowrap" />
-                  <TableCell className="w-10 text-right" />
+                  <TableCell className="w-24 shrink-0 whitespace-nowrap" />
+                  <TableCell className="w-10 min-w-10 shrink-0 text-right" />
                 </TableRow>
               ) : (
                 <SortableContext
